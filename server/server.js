@@ -4,9 +4,13 @@ import mongoose from "mongoose";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import dotenv from "dotenv";
-import categoryRoutes from "./routes/category.js";
-import productRoutes from "./routes/product.js";
 import authRoutes from "./routes/auth.js";
+import categoryRoutes from "./routes/category.js";
+import brandRoutes from "./routes/brands.js";
+import productRoutes from "./routes/product.js";
+import orderRoutes from "./routes/order.js";
+import cartRoutes from "./routes/cart.js";
+
 import path from "path";
 
 dotenv.config();
@@ -26,6 +30,18 @@ app.use("/products", productRoutes);
 app.use(
   "/uploads",
   express.static("uploads")
+);
+app.use(
+  "/brands",
+  brandRoutes
+);
+app.use(
+  "/orders",
+  orderRoutes
+);
+app.use(
+  "/cart",
+  cartRoutes
 );
 
 mongoose

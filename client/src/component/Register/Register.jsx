@@ -1,9 +1,4 @@
-import {
-  Box,
-  Button,
-  TextField,
-  Typography,
-} from "@mui/material";
+import { Box, Button, TextField, Typography, MenuItem } from "@mui/material";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../../api/axios";
@@ -16,6 +11,7 @@ const Register = () => {
     name: "",
     email: "",
     password: "",
+    role: "customer",
   });
 
   const handleChange = (e) => {
@@ -27,29 +23,18 @@ const Register = () => {
 
   const handleRegister = async () => {
     try {
-      const res = await api.post(
-        "/auth/register",
-        formData
-      );
+      const res = await api.post("/auth/register", formData);
       navigate("/");
     } catch (err) {
       console.error(err);
 
-      alert(
-        err?.response?.data?.message ||
-          "Registration failed"
-      );
+      alert(err?.response?.data?.message || "Registration failed");
     }
   };
 
   return (
     <div className="main">
-
-      <Typography
-        variant="h4"
-        textAlign="center"
-        mb={3}
-      >
+      <Typography variant="h4" textAlign="center" mb={3}>
         Register
       </Typography>
 
@@ -81,6 +66,20 @@ const Register = () => {
         onChange={handleChange}
       />
 
+      <TextField
+        select
+        fullWidth
+        margin="normal"
+        label="Role"
+        name="role"
+        value={formData.role}
+        onChange={handleChange}
+      >
+        <MenuItem value="customer">Customer</MenuItem>
+
+        <MenuItem value="shop">Shop Owner</MenuItem>
+      </TextField>
+
       <Button
         fullWidth
         variant="contained"
@@ -90,11 +89,7 @@ const Register = () => {
         Register
       </Button>
 
-      <Button
-        fullWidth
-        sx={{ mt: 1 }}
-        onClick={() => navigate("/")}
-      >
+      <Button fullWidth sx={{ mt: 1 }} onClick={() => navigate("/")}>
         Back to Login
       </Button>
     </div>

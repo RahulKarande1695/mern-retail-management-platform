@@ -15,7 +15,7 @@ const CategoriesList = () => {
         height: "85vh",
       }}
     >
-      <SearchBar title="Category" onSearch={setSearch} />
+      <SearchBar title="Category" onSearch={setSearch}  addRoute="addcategories"/>
       <Box sx={{ marginTop: "30px" }}>
         <CategoryTable search={search} />
       </Box>

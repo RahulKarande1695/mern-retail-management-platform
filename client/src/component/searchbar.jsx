@@ -10,11 +10,11 @@ import { setProduct } from "../redux/slice/productSlice";
 import api from "../api/axios";
 
 const SearchBar = (props) => {
-  const { title, onSearch } = props;
-
- const handleChange = (e) => {
-  onSearch(e.target.value);
-};
+  const {
+    title,
+    onSearch,
+    addRoute,
+  } = props;
 
   return (
     <Box
@@ -32,6 +32,7 @@ const SearchBar = (props) => {
         />
         <label>{title}</label>
       </Box>
+
       <Paper
         component="form"
         sx={{
@@ -41,19 +42,31 @@ const SearchBar = (props) => {
           width: 400,
         }}
       >
-        <IconButton type="button" sx={{ p: "10px" }} aria-label="search">
+        <IconButton
+          type="button"
+          sx={{ p: "10px" }}
+        >
           <SearchIcon />
         </IconButton>
+
         <InputBase
-          sx={{ ml: 1, flex: 1 }}
-          placeholder=""
-          onChange={(e) => handleChange(e)}
+          sx={{
+            ml: 1,
+            flex: 1,
+          }}
+          onChange={(e) =>
+            onSearch(
+              e.target.value
+            )
+          }
         />
       </Paper>
-      <Link to={title === "Category" ? "addcategories" : "addproducts"}>
+
+      <Link to={addRoute}>
         Add New
       </Link>
     </Box>
   );
 };
+
 export default SearchBar;

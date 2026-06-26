@@ -1,9 +1,4 @@
-import {
-  Box,
-  Button,
-  TextField,
-  Typography,
-} from "@mui/material";
+import { Box, Button, TextField, Typography } from "@mui/material";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import api from "../../api/axios";
@@ -18,47 +13,29 @@ const VerifyOtp = () => {
 
   const handleVerifyOtp = async () => {
     try {
-      const res = await api.post(
-        "/auth/verify-otp",
-        {
-          email,
-          otp,
-        }
-      );
-
-      localStorage.setItem(
-        "accessToken",
-        res.data.accessToken
-      );
+      const res = await api.post("/auth/verify-otp", {
+        email,
+        otp,
+      });
+      console.log(res.data,"verify token")
+      localStorage.setItem("token", res.data.accessToken);
+      localStorage.setItem("user", JSON.stringify(res.data.user));
 
       navigate("/dgflake");
     } catch (err) {
       console.error(err);
 
-      alert(
-        err?.response?.data?.message ||
-          "Invalid OTP"
-      );
+      alert(err?.response?.data?.message || "Invalid OTP");
     }
   };
 
   return (
-    <div
-     className="main"
-    >
-      <Typography
-        variant="h5"
-        mb={2}
-        textAlign="center"
-      >
+    <div className="main">
+      <Typography variant="h5" mb={2} textAlign="center">
         Verify OTP
       </Typography>
 
-      <Typography
-        variant="body2"
-        mb={2}
-        textAlign="center"
-      >
+      <Typography variant="body2" mb={2} textAlign="center">
         OTP sent to {email}
       </Typography>
 
@@ -66,9 +43,7 @@ const VerifyOtp = () => {
         fullWidth
         label="Enter OTP"
         value={otp}
-        onChange={(e) =>
-          setOtp(e.target.value)
-        }
+        onChange={(e) => setOtp(e.target.value)}
         margin="normal"
       />
 

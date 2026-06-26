@@ -32,7 +32,6 @@ function CategoryTable({ search }) {
 
   const getCategories = async () => {
     try {
-      console.log("search =>", search);
       const res = await api.get(`/categories?search=${search || ""}`);
 
       setRows(

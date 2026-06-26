@@ -1,16 +1,16 @@
 import mongoose from "mongoose";
 
-const categorySchema = new mongoose.Schema(
+const brandSchema = new mongoose.Schema(
   {
     name: {
       type: String,
       required: true,
-      unique: true,
-      trim: true,
     },
 
-    description: {
-      type: String,
+    category: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Category",
+      required: true,
     },
 
     status: {
@@ -18,8 +18,7 @@ const categorySchema = new mongoose.Schema(
       default: true,
     },
     
-    // business ID
-    categoryCode: {
+    brandCode: {
       type: String,
       unique: true,
       required: true,
@@ -30,4 +29,4 @@ const categorySchema = new mongoose.Schema(
   },
 );
 
-export default mongoose.model("Category", categorySchema);
+export default mongoose.model("Brand", brandSchema);

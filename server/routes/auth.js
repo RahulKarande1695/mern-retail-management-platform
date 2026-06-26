@@ -8,28 +8,37 @@ import sendOtp from "../utils/sendOtp.js";
 
 const router = express.Router();
 
-const generateTokens = (userId) => {
+const generateTokens = (user) => {
   const accessToken = jwt.sign(
-    { id: userId },
+    {
+      id: user._id,
+      role: user.role,
+    },
     process.env.JWT_ACCESS_SECRET,
-    { expiresIn: "15m" }
+    {
+      expiresIn: "15m",
+    },
   );
+
   const refreshToken = jwt.sign(
-    { id: userId },
+    {
+      id: user._id,
+    },
     process.env.JWT_REFRESH_SECRET,
-    { expiresIn: "7d" }
+    {
+      expiresIn: "7d",
+    },
   );
+
   return { accessToken, refreshToken };
 };
 
 // Post /auth/register
 router.post("/register", async (req, res) => {
   try {
-    const { name, email, password } =
-      req.body;
+    const { name, email, password, role } = req.body;
 
-    const existingUser =
-      await User.findOne({ email });
+    const existingUser = await User.findOne({ email });
 
     if (existingUser) {
       return res.status(400).json({
@@ -41,6 +50,7 @@ router.post("/register", async (req, res) => {
       name,
       email,
       password,
+      role,
     });
 
     res.status(201).json({
@@ -76,12 +86,12 @@ router.post("/login", async (req, res) => {
     await sendOtp(email, code);
     res.json({ message: "OTP sent to your email" });
   } catch (err) {
-  console.error("LOGIN ERROR:", err);
+    console.error("LOGIN ERROR:", err);
 
-  res.status(500).json({
-    message: err.message,
-  });
-}
+    res.status(500).json({
+      message: err.message,
+    });
+  }
 });
 
 // POST /auth/verify-otp
@@ -89,13 +99,15 @@ router.post("/verify-otp", async (req, res) => {
   const { email, otp } = req.body;
   try {
     const record = await Otp.findOne({ email, code: otp });
-    if (!record) return res.status(400).json({ message: "Invalid or expired OTP" });
-    if (record.expiresAt < new Date()) return res.status(400).json({ message: "OTP expired" });
+    if (!record)
+      return res.status(400).json({ message: "Invalid or expired OTP" });
+    if (record.expiresAt < new Date())
+      return res.status(400).json({ message: "OTP expired" });
 
     await Otp.deleteMany({ email }); // consume OTP
 
     const user = await User.findOne({ email });
-    const { accessToken, refreshToken } = generateTokens(user._id);
+    const { accessToken, refreshToken } = generateTokens(user);
 
     // Refresh token → httpOnly cookie (can't be read by JS)
     res.cookie("refreshToken", refreshToken, {
@@ -105,7 +117,15 @@ router.post("/verify-otp", async (req, res) => {
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
-    res.json({ accessToken });
+    res.json({
+      accessToken,
+      user: {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+      },
+    });
   } catch (err) {
     res.status(500).json({ message: "Server error" });
   }

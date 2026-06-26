@@ -16,7 +16,7 @@ const ProductUi = () => {
         height: "85vh",
       }}
     >
-      <SearchBar title={"Products"} onSearch={setSearch}/>
+      <SearchBar title={"Products"} onSearch={setSearch} addRoute="addproducts"/>
       <Box sx={{ marginTop: "30px" }}>
         <ProductsTable search={search}/>
       </Box>
