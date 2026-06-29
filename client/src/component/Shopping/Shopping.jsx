@@ -45,38 +45,40 @@ const CustomerProducts = () => {
   const increaseQty = (product) => {
     setQty((prev) => ({
       ...prev,
-      [product._id]: Math.min(
-        prev[product._id] + 1,
-        product.stock
-      ),
+      [product._id]: Math.min(prev[product._id] + 1, product.stock),
     }));
   };
 
   const decreaseQty = (product) => {
     setQty((prev) => ({
       ...prev,
-      [product._id]: Math.max(
-        prev[product._id] - 1,
-        1
-      ),
+      [product._id]: Math.max(prev[product._id] - 1, 1),
     }));
   };
 
-  const addToCart = (product) => {
-    console.log({
-      productId: product._id,
-      quantity: qty[product._id],
-    });
+  const addToCart = async (product) => {
+    try {
+      await api.post("/cart/add", {
+        productId: product._id,
+        quantity: qty[product._id] || 1,
+      });
 
-    alert("Cart API later 😄");
+      alert("Product added to cart");
+
+      // Optional: Refresh cart count/navbar
+      // getCart();
+    } catch (err) {
+      console.log(err);
+
+      alert(err?.response?.data?.message || "Something went wrong");
+    }
   };
 
   return (
     <Box
       sx={{
         display: "grid",
-        gridTemplateColumns:
-          "repeat(auto-fill,minmax(280px,1fr))",
+        gridTemplateColumns: "repeat(auto-fill,minmax(280px,1fr))",
         gap: 3,
         p: 3,
       }}
@@ -90,68 +92,39 @@ const CustomerProducts = () => {
           />
 
           <CardContent>
-
-            <Typography
-              variant="h6"
-              fontWeight={600}
-            >
+            <Typography variant="h6" fontWeight={600}>
               {product.name}
             </Typography>
 
-            <Typography
-              color="text.secondary"
-            >
+            <Typography color="text.secondary">
               {product.brand?.name}
             </Typography>
 
-            <Typography
-              color="text.secondary"
-            >
+            <Typography color="text.secondary">
               {product.category?.name}
             </Typography>
 
-            <Typography>
-              {product.packSize}
-            </Typography>
+            <Typography>{product.packSize}</Typography>
 
-            <Box
-              display="flex"
-              gap={1}
-              mt={2}
-              alignItems="center"
-            >
+            <Box display="flex" gap={1} mt={2} alignItems="center">
               <Typography
                 sx={{
-                  textDecoration:
-                    "line-through",
+                  textDecoration: "line-through",
                 }}
               >
                 ₹{product.mrp}
               </Typography>
 
-              <Typography
-                fontWeight={700}
-                color="green"
-              >
+              <Typography fontWeight={700} color="green">
                 ₹{product.sellingPrice}
               </Typography>
             </Box>
 
-            <Typography
-              color="success.main"
-              mt={1}
-            >
-              Save ₹
-              {product.mrp -
-                product.sellingPrice}
+            <Typography color="success.main" mt={1}>
+              Save ₹{product.mrp - product.sellingPrice}
             </Typography>
 
-            <Typography
-              mt={1}
-            >
-              Stock :
-              {product.stock}
-            </Typography>
+            <Typography mt={1}>Stock :{product.stock}</Typography>
 
             <Box
               display="flex"
@@ -160,11 +133,7 @@ const CustomerProducts = () => {
               mt={3}
               mb={2}
             >
-              <IconButton
-                onClick={() =>
-                  decreaseQty(product)
-                }
-              >
+              <IconButton onClick={() => decreaseQty(product)}>
                 <RemoveIcon />
               </IconButton>
 
@@ -177,11 +146,7 @@ const CustomerProducts = () => {
                 {qty[product._id]}
               </Typography>
 
-              <IconButton
-                onClick={() =>
-                  increaseQty(product)
-                }
-              >
+              <IconButton onClick={() => increaseQty(product)}>
                 <AddIcon />
               </IconButton>
             </Box>
@@ -189,13 +154,10 @@ const CustomerProducts = () => {
             <Button
               fullWidth
               variant="contained"
-              onClick={() =>
-                addToCart(product)
-              }
+              onClick={() => addToCart(product)}
             >
               Add To Cart
             </Button>
-
           </CardContent>
         </Card>
       ))}

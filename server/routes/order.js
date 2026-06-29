@@ -289,7 +289,8 @@ router.get("/:id", authMiddleware, async (req, res) => {
       status: true,
     })
       .populate("customer")
-      .populate("items.product");
+      .populate("items.product")
+      .populate("deliveryBoy", "name mobile vehicleType");
     if (!order) {
       return res.status(404).json({
         message: "Order not found",

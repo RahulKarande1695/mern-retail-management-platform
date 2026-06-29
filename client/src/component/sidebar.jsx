@@ -2,8 +2,8 @@ import MenuBar from "./menuBar";
 import homeMenu from "../homeMenu.svg";
 import category from "../category.svg";
 import productsMenu from "../productsMenu.svg";
-import brandMenu from "../tag.png"
-import orderMenu from "../list.png"
+import brandMenu from "../tag.png";
+import orderMenu from "../list.png";
 import { useNavigate } from "react-router-dom";
 import { Box } from "@mui/material";
 
@@ -40,10 +40,15 @@ const Sidebar = () => {
       menu: "shop",
       link: "shop",
     },
-       {
+    {
       icon: orderMenu,
       menu: "cart",
       link: "cart",
+    },
+    {
+      icon: orderMenu,
+      menu: "delivery Boy Verification",
+      link: "deliveryBoy",
     },
   ];
   return (

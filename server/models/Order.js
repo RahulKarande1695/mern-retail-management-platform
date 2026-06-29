@@ -14,7 +14,7 @@ const itemTrackingSchema = new mongoose.Schema(
   },
   {
     _id: false,
-  }
+  },
 );
 
 const orderItemSchema = new mongoose.Schema({
@@ -40,16 +40,16 @@ const orderItemSchema = new mongoose.Schema({
     default: 1,
   },
 
-    acceptedQty: {
+  acceptedQty: {
     type: Number,
     default: 0,
-     min: 0,
+    min: 0,
   },
 
   cancelledQty: {
     type: Number,
     default: 0,
-     min: 0,
+    min: 0,
   },
 
   price: {
@@ -67,7 +67,7 @@ const orderItemSchema = new mongoose.Schema({
       "Packed",
       "Assigned",
       "Picked",
-      "Delivered"
+      "Delivered",
     ],
     default: "Placed",
   },
@@ -95,7 +95,7 @@ const trackingSchema = new mongoose.Schema(
   },
   {
     _id: false,
-  }
+  },
 );
 
 const orderSchema = new mongoose.Schema(
@@ -152,15 +152,15 @@ const orderSchema = new mongoose.Schema(
 
     orderStatus: {
       type: String,
-       enum: [
-    "Placed",
-    "Processing",
-    "PartiallyFulfilled",
-    "Delivered",
-    "Cancelled",
-    "Returned",
-    "Processing"
-  ],
+      enum: [
+        "Placed",
+        "Processing",
+        "PartiallyFulfilled",
+        "Delivered",
+        "Cancelled",
+        "Returned",
+        "Processing",
+      ],
       default: "Placed",
     },
 
@@ -180,6 +180,18 @@ const orderSchema = new mongoose.Schema(
       type: Boolean,
       default: true,
     },
+
+    deliveryBoy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "DeliveryBoy",
+      default: null,
+    },
+
+    assignedAt: Date,
+
+    pickedAt: Date,
+
+    deliveredAt: Date,
   },
   {
     timestamps: true,

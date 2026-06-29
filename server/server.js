@@ -10,7 +10,9 @@ import brandRoutes from "./routes/brands.js";
 import productRoutes from "./routes/product.js";
 import orderRoutes from "./routes/order.js";
 import cartRoutes from "./routes/cart.js";
-
+import addressRoutes from "./routes/address.js"
+import checkoutRoutes from "./routes/checkout.js"
+import deliveryBoyRoutes from "./routes/deliveryBoy.js";
 import path from "path";
 
 dotenv.config();
@@ -43,6 +45,16 @@ app.use(
   "/cart",
   cartRoutes
 );
+app.use(
+  "/address",
+  addressRoutes
+);
+app.use(
+  "/deliveryBoy",
+  deliveryBoyRoutes
+);
+
+app.use("/checkout", checkoutRoutes);
 
 mongoose
   .connect(process.env.MONGO_URI)

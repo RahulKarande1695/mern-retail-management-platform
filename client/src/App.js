@@ -18,6 +18,10 @@ import AddNewBrand from "./component/BrandsList/AddNewBrand";
 import OrderDetails from "./component/OrdersList/OrderDetails";
 import CustomerProducts from "./component/Shopping/Shopping";
 import CustomerOrders from "./component/CustomerOrders/CustomerOrders";
+import DeliveryBoyList from "./component/DeliveryBoy/DeliveryBoyList";
+import AddDeliveryBoy from "./component/DeliveryBoy/AddDeliveryBoy";
+import EditDeliveryBoy from "./component/DeliveryBoy/EditDeliveryBoy";
+import DeliveryBoyDetails from "./component/DeliveryBoy/DeliveryBoyDetails";
 
 function App() {
   return (
@@ -130,6 +134,10 @@ function App() {
 
         <Route path="shop" element={<CustomerProducts />} />
         <Route path="cart" element={<CustomerOrders />} />
+        <Route path="deliveryBoy" element={<DeliveryBoyList />} />
+        <Route path="deliveryBoy/add" element={<AddDeliveryBoy />} />
+        <Route path="deliveryBoy/edit/:id" element={<EditDeliveryBoy />} />
+        <Route path="deliveryBoy/:id" element={<DeliveryBoyDetails />} />
         <Route path="*" element={<Missing />} />
       </Route>
     </Routes>

@@ -9,6 +9,10 @@ import {
   TableRow,
   Paper,
   Chip,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
 } from "@mui/material";
 
 import { useEffect, useState } from "react";
@@ -21,15 +25,53 @@ const OrderDetails = () => {
   const { id } = useParams();
 
   const [order, setOrder] = useState(null);
+  const [deliveryBoys, setDeliveryBoys] = useState([]);
+  const [selectedDeliveryBoy, setSelectedDeliveryBoy] = useState("");
+  const canAssign =
+    order.items.every((item) => item.itemStatus === "Packed") &&
+    !order.deliveryBoy;
 
   useEffect(() => {
     getOrder();
+    getDeliveryBoys();
   }, []);
 
   const getOrder = async () => {
     const res = await api.get(`/orders/${id}`);
 
     setOrder(res.data);
+  };
+
+  const getDeliveryBoys = async () => {
+    try {
+      const res = await api.get("/deliveryBoy");
+
+      const availableDeliveryBoys = res.data.filter(
+        (item) => item.isVerified && item.isAvailable,
+      );
+
+      setDeliveryBoys(availableDeliveryBoys);
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  const assignDeliveryBoy = async () => {
+    try {
+      if (!selectedDeliveryBoy) {
+        return alert("Please select delivery boy");
+      }
+
+      await api.post(`/orders/${order._id}/assignDeliveryBoy`, {
+        deliveryBoyId: selectedDeliveryBoy,
+      });
+
+      alert("Delivery Boy Assigned Successfully");
+
+      getOrder();
+    } catch (err) {
+      console.log(err);
+    }
   };
 
   const handleAccept = async (item) => {
@@ -156,9 +198,94 @@ const OrderDetails = () => {
         </Table>
       </TableContainer>
 
+     {canAssign && (
+          <Box
+            mt={4}
+            sx={{
+              border: "1px solid #ddd",
+              p: 2,
+              borderRadius: 2,
+            }}
+          >
+            <h3>Assign Delivery Boy</h3>
+
+            <FormControl
+              fullWidth
+              sx={{
+                mt: 2,
+              }}
+            >
+              <InputLabel>Delivery Boy</InputLabel>
+
+              <Select
+                value={selectedDeliveryBoy}
+                label="Delivery Boy"
+                onChange={(e) => setSelectedDeliveryBoy(e.target.value)}
+              >
+                {deliveryBoys.map((boy) => (
+                  <MenuItem key={boy._id} value={boy._id}>
+                    {boy.name} ({boy.vehicleType})
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+
+            <Button
+              variant="contained"
+              sx={{
+                mt: 2,
+              }}
+              onClick={assignDeliveryBoy}
+            >
+              Assign
+            </Button>
+          </Box>
+        )}
+             {canAssign && (
+          <Box
+            mt={4}
+            sx={{
+              border: "1px solid #ddd",
+              p: 2,
+              borderRadius: 2,
+            }}
+          >
+            <h3>Assign Delivery Boy</h3>
+
+            <FormControl
+              fullWidth
+              sx={{
+                mt: 2,
+              }}
+            >
+              <InputLabel>Delivery Boy</InputLabel>
+
+              <Select
+                value={selectedDeliveryBoy}
+                label="Delivery Boy"
+                onChange={(e) => setSelectedDeliveryBoy(e.target.value)}
+              >
+                {deliveryBoys.map((boy) => (
+                  <MenuItem key={boy._id} value={boy._id}>
+                    {boy.name} ({boy.vehicleType})
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+
+            <Button
+              variant="contained"
+              sx={{
+                mt: 2,
+              }}
+              onClick={assignDeliveryBoy}
+            >
+              Assign
+            </Button>
+          </Box>
+        )}
       <Box mt={4}>
         <h3>Tracking History</h3>
-
         {order.items?.map((item) => (
           <Box key={item._id} mt={3}>
             <h4>{item.productName}</h4>

@@ -13,9 +13,11 @@ import AddIcon from "@mui/icons-material/Add";
 import RemoveIcon from "@mui/icons-material/Remove";
 import DeleteIcon from "@mui/icons-material/Delete";
 import api from "../../api/axios";
+import { useNavigate } from "react-router-dom";
 
 
 const CartSection = ({ cart, refresh }) => {
+  const navigate = useNavigate();
   const increaseQty = async (item) => {
     await api.post("/cart/update", {
       productId: item.product._id,
@@ -42,10 +44,6 @@ const CartSection = ({ cart, refresh }) => {
     });
 
     refresh();
-  };
-
-  const handlePayment = async () => {
-    alert("Checkout API Next 😄");
   };
 
   const total = cart.items.reduce(
@@ -235,12 +233,12 @@ const CartSection = ({ cart, refresh }) => {
         </Typography>
 
         <Button
-          variant="contained"
-          size="large"
-          onClick={handlePayment}
-        >
-          PAY NOW
-        </Button>
+  variant="contained"
+  fullWidth
+  onClick={() => navigate("/customer/checkout")}
+>
+  Proceed To Checkout
+</Button>
       </Box>
     </Box>
   );
