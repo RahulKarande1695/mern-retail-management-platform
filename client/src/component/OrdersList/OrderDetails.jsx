@@ -28,17 +28,18 @@ const OrderDetails = () => {
   const [deliveryBoys, setDeliveryBoys] = useState([]);
   const [selectedDeliveryBoy, setSelectedDeliveryBoy] = useState("");
   const canAssign =
-    order.items.every((item) => item.itemStatus === "Packed") &&
+    order?.items.every((item) => item.itemStatus === "Packed") &&
     !order.deliveryBoy;
 
   useEffect(() => {
     getOrder();
     getDeliveryBoys();
-  }, []);
+  }, [id]);
 
   const getOrder = async () => {
     const res = await api.get(`/orders/${id}`);
-
+  console.log("Order Response", res.data);
+  console.log("Items", res.data.items);
     setOrder(res.data);
   };
 
@@ -75,6 +76,9 @@ const OrderDetails = () => {
   };
 
   const handleAccept = async (item) => {
+     console.log("UI Item ID:", item._id);
+  const latest = await api.get(`/orders/${order._id}`);
+  console.log("Latest API Item ID:", latest.data.items[0]._id);
     await api.post(`/orders/${order._id}/items/${item._id}/accept`, {
       acceptedQty: 1,
     });
@@ -199,49 +203,6 @@ const OrderDetails = () => {
       </TableContainer>
 
      {canAssign && (
-          <Box
-            mt={4}
-            sx={{
-              border: "1px solid #ddd",
-              p: 2,
-              borderRadius: 2,
-            }}
-          >
-            <h3>Assign Delivery Boy</h3>
-
-            <FormControl
-              fullWidth
-              sx={{
-                mt: 2,
-              }}
-            >
-              <InputLabel>Delivery Boy</InputLabel>
-
-              <Select
-                value={selectedDeliveryBoy}
-                label="Delivery Boy"
-                onChange={(e) => setSelectedDeliveryBoy(e.target.value)}
-              >
-                {deliveryBoys.map((boy) => (
-                  <MenuItem key={boy._id} value={boy._id}>
-                    {boy.name} ({boy.vehicleType})
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-
-            <Button
-              variant="contained"
-              sx={{
-                mt: 2,
-              }}
-              onClick={assignDeliveryBoy}
-            >
-              Assign
-            </Button>
-          </Box>
-        )}
-             {canAssign && (
           <Box
             mt={4}
             sx={{

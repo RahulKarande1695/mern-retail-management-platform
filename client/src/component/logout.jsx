@@ -1,6 +1,7 @@
 import { Box, Button } from "@mui/material";
 import logout from "../logout.svg";
 import { useNavigate } from "react-router-dom";
+import api from "../api/axios";
 const style = {
   position: "absolute",
   top: "50%",
@@ -17,6 +18,36 @@ const style = {
 const LogoutUser = (props) => {
   const { setOpen } = props;
   const navigate = useNavigate();
+  const handleLogout = async () => {
+    try {
+      await api.post("/auth/logout");
+    } catch (err) {
+      console.log(err);
+    }
+
+    const currentRole = sessionStorage.getItem("currentRole");
+
+    switch (currentRole) {
+      case "shop":
+        localStorage.removeItem("shopToken");
+        localStorage.removeItem("shop");
+        break;
+
+      case "customer":
+        localStorage.removeItem("customerToken");
+        localStorage.removeItem("customer");
+        break;
+
+      case "deliveryPartner":
+        localStorage.removeItem("deliveryPartnerToken");
+        localStorage.removeItem("deliveryPartner");
+        break;
+    }
+
+    sessionStorage.removeItem("currentRole");
+
+    navigate("/");
+  };
   return (
     <Box
       sx={{
@@ -40,10 +71,20 @@ const LogoutUser = (props) => {
       </Box>
 
       <Box display={"flex"} justifyContent={"center"} gap={"60px"}>
-        <Button sx={{fontSize:"10px"}} className="logout_btn" variant="contained" onClick={() => setOpen(false)}>
+        <Button
+          sx={{ fontSize: "10px" }}
+          className="logout_btn"
+          variant="contained"
+          onClick={() => setOpen(false)}
+        >
           Cancel
         </Button>
-        <Button sx={{fontSize:"10px"}} className="logout_btn" variant="outlined" onClick={() => navigate("/")}>
+        <Button
+          sx={{ fontSize: "10px" }}
+          className="logout_btn"
+          variant="outlined"
+          onClick={handleLogout}
+        >
           Confirm
         </Button>
       </Box>

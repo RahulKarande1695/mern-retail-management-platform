@@ -23,6 +23,15 @@ import AddDeliveryBoy from "./component/DeliveryBoy/AddDeliveryBoy";
 import EditDeliveryBoy from "./component/DeliveryBoy/EditDeliveryBoy";
 import DeliveryBoyDetails from "./component/DeliveryBoy/DeliveryBoyDetails";
 
+import Login from "./component/DeliveryPatner/Login";
+import DeliveryLayout from "./component/DeliveryPatner/Layout";
+import Dashboard from "./component/DeliveryPatner/Dashboard";
+import AssignedOrders from "./component/DeliveryPatner/AssignedOrders";
+import DeliveryOrderDetails from "./component/DeliveryPatner/OrderDetails";
+import History from "./component/DeliveryPatner/History";
+import Profile from "./component/DeliveryPatner/Profile";
+import ChangePassword from "./component/DeliveryPatner/ChangePassword";
+
 function App() {
   return (
     <Routes>
@@ -42,7 +51,6 @@ function App() {
             </RoleProtectedRoute>
           }
         />
-
         <Route
           path="categories/addcategories"
           element={
@@ -51,7 +59,6 @@ function App() {
             </RoleProtectedRoute>
           }
         />
-
         <Route
           path="categories/addcategories/:id"
           element={
@@ -60,7 +67,6 @@ function App() {
             </RoleProtectedRoute>
           }
         />
-
         <Route
           path="products"
           element={
@@ -69,7 +75,6 @@ function App() {
             </RoleProtectedRoute>
           }
         />
-
         <Route
           path="products/addproducts"
           element={
@@ -78,7 +83,6 @@ function App() {
             </RoleProtectedRoute>
           }
         />
-
         <Route
           path="products/addproducts/:id"
           element={
@@ -87,7 +91,6 @@ function App() {
             </RoleProtectedRoute>
           }
         />
-
         <Route
           path="brands"
           element={
@@ -96,7 +99,6 @@ function App() {
             </RoleProtectedRoute>
           }
         />
-
         <Route
           path="brands/addbrand"
           element={
@@ -105,7 +107,6 @@ function App() {
             </RoleProtectedRoute>
           }
         />
-
         <Route
           path="brands/addbrand/:id"
           element={
@@ -114,7 +115,6 @@ function App() {
             </RoleProtectedRoute>
           }
         />
-
         <Route
           path="orders"
           element={
@@ -131,15 +131,79 @@ function App() {
             </RoleProtectedRoute>
           }
         />
-
-        <Route path="shop" element={<CustomerProducts />} />
-        <Route path="cart" element={<CustomerOrders />} />
-        <Route path="deliveryBoy" element={<DeliveryBoyList />} />
-        <Route path="deliveryBoy/add" element={<AddDeliveryBoy />} />
-        <Route path="deliveryBoy/edit/:id" element={<EditDeliveryBoy />} />
-        <Route path="deliveryBoy/:id" element={<DeliveryBoyDetails />} />
-        <Route path="*" element={<Missing />} />
+        // Delivery Boy Verification
+        <Route
+          path="deliveryBoy"
+          element={
+            <RoleProtectedRoute role="shop">
+              <DeliveryBoyList />
+            </RoleProtectedRoute>
+          }
+        />
+        <Route
+          path="deliveryBoy/add"
+          element={
+            <RoleProtectedRoute role="shop">
+              <AddDeliveryBoy />
+            </RoleProtectedRoute>
+          }
+        />
+        <Route
+          path="deliveryBoy/edit/:id"
+          element={
+            <RoleProtectedRoute role="shop">
+              <EditDeliveryBoy />
+            </RoleProtectedRoute>
+          }
+        />
+        <Route
+          path="deliveryBoy/:id"
+          element={
+            <RoleProtectedRoute role="shop">
+              <DeliveryBoyDetails />
+            </RoleProtectedRoute>
+          }
+        />
       </Route>
+
+      // Customer
+      <Route path="customer" element={<LayoutDGFlake />}>
+        <Route
+          index
+          element={
+            <RoleProtectedRoute role="customer">
+              <CustomerProducts />
+            </RoleProtectedRoute>
+          }
+        />
+        <Route
+          path="cart"
+          element={
+            <RoleProtectedRoute role="customer">
+              <CustomerOrders />
+            </RoleProtectedRoute>
+          }
+        />
+      </Route>
+      
+      // Delivery Partenr
+      <Route
+        path="delivery"
+        element={
+          <RoleProtectedRoute role="deliveryPartner">
+            <DeliveryLayout />
+          </RoleProtectedRoute>
+        }
+      >
+        <Route index element={<Dashboard />} />
+        <Route path="dashboard" element={<Dashboard />} />
+        <Route path="orders" element={<AssignedOrders />} />
+        <Route path="orders/:id" element={<DeliveryOrderDetails />} />
+        <Route path="history" element={<History />} />
+        <Route path="profile" element={<Profile />} />
+        <Route path="change-password" element={<ChangePassword />} />
+      </Route>
+      <Route path="*" element={<Missing />} />
     </Routes>
   );
 }

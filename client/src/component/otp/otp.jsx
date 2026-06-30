@@ -10,21 +10,45 @@ const VerifyOtp = () => {
   const location = useLocation();
 
   const email = location.state?.email;
+  const roleLog = location.state?.role;
 
   const handleVerifyOtp = async () => {
     try {
       const res = await api.post("/auth/verify-otp", {
         email,
         otp,
+        role: roleLog,
       });
-      console.log(res.data,"verify token")
-      localStorage.setItem("token", res.data.accessToken);
-      localStorage.setItem("user", JSON.stringify(res.data.user));
 
-      navigate("/dgflake");
+      const { accessToken, role, user } = res.data;
+
+      switch (role) {
+        case "shop":
+          localStorage.setItem("shopToken", accessToken);
+          localStorage.setItem("shop", JSON.stringify(user));
+          sessionStorage.setItem("currentRole", "shop");
+          navigate("/dgflake");
+          break;
+
+        case "customer":
+          localStorage.setItem("customerToken", accessToken);
+          localStorage.setItem("customer", JSON.stringify(user));
+          sessionStorage.setItem("currentRole", "customer");
+          navigate("/customer");
+          break;
+
+        case "deliveryPartner":
+          localStorage.setItem("deliveryPartnerToken", accessToken);
+          localStorage.setItem("deliveryPartner", JSON.stringify(user));
+          sessionStorage.setItem("currentRole", "deliveryPartner");
+          navigate("/delivery/dashboard");
+          break;
+
+        default:
+          navigate("/");
+      }
     } catch (err) {
       console.error(err);
-
       alert(err?.response?.data?.message || "Invalid OTP");
     }
   };

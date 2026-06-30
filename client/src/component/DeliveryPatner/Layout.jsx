@@ -49,16 +49,16 @@ const menu = [
   },
 ];
 
-const Layout = () => {
+const DeliveryLayout = () => {
   const navigate = useNavigate();
 
   const location = useLocation();
 
   const logout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("deliveryBoy");
+        localStorage.removeItem("deliveryPartnerToken");
+        localStorage.removeItem("deliveryPartner");
 
-    navigate("/delivery/login");
+    navigate("/");
   };
 
   return (
@@ -148,4 +148,4 @@ const Layout = () => {
   );
 };
 
-export default Layout;
+export default DeliveryLayout;

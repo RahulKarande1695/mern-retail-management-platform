@@ -5,14 +5,15 @@ import crypto from "crypto";
 import User from "../models/User.js";
 import Otp from "../models/Otp.js";
 import sendOtp from "../utils/sendOtp.js";
+import DeliveryBoy from "../models/DeliveryBoy.js";
 
 const router = express.Router();
 
-const generateTokens = (user) => {
+const generateTokens = (account, role) => {
   const accessToken = jwt.sign(
     {
-      id: user._id,
-      role: user.role,
+      id: account._id,
+      role,
     },
     process.env.JWT_ACCESS_SECRET,
     {
@@ -22,7 +23,8 @@ const generateTokens = (user) => {
 
   const refreshToken = jwt.sign(
     {
-      id: user._id,
+      id: account._id,
+      role,
     },
     process.env.JWT_REFRESH_SECRET,
     {
@@ -30,7 +32,10 @@ const generateTokens = (user) => {
     },
   );
 
-  return { accessToken, refreshToken };
+  return {
+    accessToken,
+    refreshToken,
+  };
 };
 
 // Post /auth/register
@@ -38,7 +43,16 @@ router.post("/register", async (req, res) => {
   try {
     const { name, email, password, role } = req.body;
 
-    const existingUser = await User.findOne({ email });
+    if (!["customer", "shop"].includes(role)) {
+      return res.status(400).json({
+        message: "Invalid role",
+      });
+    }
+
+    const existingUser = await User.findOne({
+      email,
+      role,
+    });
 
     if (existingUser) {
       return res.status(400).json({
@@ -54,40 +68,109 @@ router.post("/register", async (req, res) => {
     });
 
     res.status(201).json({
-      message: "User registered",
+      message: "User registered successfully",
       user,
     });
   } catch (err) {
     res.status(500).json({
-      message: "Server error",
+      message: err.message,
     });
   }
 });
 
 // POST /auth/login
+// POST /auth/login
 router.post("/login", async (req, res) => {
-  const { email, password } = req.body;
   try {
-    const user = await User.findOne({ email });
-    if (!user) return res.status(401).json({ message: "Invalid credentials" });
+    const { email, password, role } = req.body;
 
-    const match = await user.comparePassword(password);
-    if (!match) return res.status(401).json({ message: "Invalid credentials" });
+    if (!["customer", "shop", "deliveryPartner"].includes(role)) {
+      return res.status(400).json({
+        message: "Invalid role",
+      });
+    }
 
-    // Generate and save OTP
+    let account;
+
+    // -----------------------------
+    // Customer / Shop Login
+    // -----------------------------
+    if (role === "customer" || role === "shop") {
+      account = await User.findOne({
+        email,
+        role,
+      });
+
+      if (!account) {
+        return res.status(401).json({
+          message: "Invalid credentials",
+        });
+      }
+
+      const match = await account.comparePassword(password);
+
+      if (!match) {
+        return res.status(401).json({
+          message: "Invalid credentials",
+        });
+      }
+    }
+
+    // -----------------------------
+    // Delivery Partner Login
+    // -----------------------------
+    if (role === "deliveryPartner") {
+      account = await DeliveryBoy.findOne({
+        email,
+        status: true,
+      });
+
+      if (!account) {
+        return res.status(401).json({
+          message: "Invalid credentials",
+        });
+      }
+
+      if (!account.isVerified) {
+        return res.status(403).json({
+          message: "Your account is not verified yet.",
+        });
+      }
+
+      const match = await account.comparePassword(password);
+
+      if (!match) {
+        return res.status(401).json({
+          message: "Invalid credentials",
+        });
+      }
+    }
+
+    // -----------------------------
+    // Generate OTP
+    // -----------------------------
+
     const code = crypto.randomInt(100000, 999999).toString();
-    await Otp.deleteMany({ email }); // clear old OTPs
+
+    await Otp.deleteMany({
+      email,
+      role,
+    });
+
     await Otp.create({
       email,
+      role,
       code,
-      expiresAt: new Date(Date.now() + 10 * 60 * 1000), // 10 minutes
+      expiresAt: new Date(Date.now() + 10 * 60 * 1000),
     });
 
     await sendOtp(email, code);
-    res.json({ message: "OTP sent to your email" });
-  } catch (err) {
-    console.error("LOGIN ERROR:", err);
 
+    res.json({
+      message: "OTP sent successfully",
+    });
+  } catch (err) {
+    console.error(err);
     res.status(500).json({
       message: err.message,
     });
@@ -96,20 +179,75 @@ router.post("/login", async (req, res) => {
 
 // POST /auth/verify-otp
 router.post("/verify-otp", async (req, res) => {
-  const { email, otp } = req.body;
   try {
-    const record = await Otp.findOne({ email, code: otp });
-    if (!record)
-      return res.status(400).json({ message: "Invalid or expired OTP" });
-    if (record.expiresAt < new Date())
-      return res.status(400).json({ message: "OTP expired" });
+    const { email, otp, role } = req.body;
+    console.log(req.body)
+    if (!["customer", "shop", "deliveryPartner"].includes(role)) {
+      return res.status(400).json({
+        message: "Invalid role",
+      });
+    }
 
-    await Otp.deleteMany({ email }); // consume OTP
+    const record = await Otp.findOne({
+      email,
+      role,
+      code: otp,
+    });
 
-    const user = await User.findOne({ email });
-    const { accessToken, refreshToken } = generateTokens(user);
+    if (!record) {
+      return res.status(400).json({
+        message: "Invalid or expired OTP",
+      });
+    }
 
-    // Refresh token → httpOnly cookie (can't be read by JS)
+    if (record.expiresAt < new Date()) {
+      return res.status(400).json({
+        message: "OTP expired",
+      });
+    }
+
+    await Otp.deleteMany({
+      email,
+      role,
+    });
+
+    let account;
+
+    if (role === "deliveryPartner") {
+      account = await DeliveryBoy.findOne({
+        email,
+        status: true,
+      });
+
+      if (!account) {
+        return res.status(404).json({
+          message: "Delivery Partner not found",
+        });
+      }
+
+      if (!account.isVerified) {
+        return res.status(403).json({
+          message: "Delivery Partner is not verified",
+        });
+      }
+    } else {
+      account = await User.findOne({
+        email,
+        role,
+      });
+
+      if (!account) {
+        return res.status(404).json({
+          message: "User not found",
+        });
+      }
+    }
+
+    const { accessToken, refreshToken } = generateTokens(
+      account,
+      role
+    );
+
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
@@ -119,26 +257,67 @@ router.post("/verify-otp", async (req, res) => {
 
     res.json({
       accessToken,
+      role,
       user: {
-        _id: user._id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
+        _id: account._id,
+        name: account.name,
+        email: account.email,
+        role,
       },
     });
   } catch (err) {
-    res.status(500).json({ message: "Server error" });
+    console.error(err);
+
+    res.status(500).json({
+      message: err.message,
+    });
   }
 });
 
 // POST /auth/refresh
-router.post("/refresh", (req, res) => {
-  const token = req.cookies.refreshToken;
-  if (!token) return res.status(401).json({ message: "No refresh token" });
-
+router.post("/refresh", async (req, res) => {
   try {
-    const decoded = jwt.verify(token, process.env.JWT_REFRESH_SECRET);
-    const { accessToken, refreshToken } = generateTokens(decoded.id);
+    const token = req.cookies.refreshToken;
+
+    if (!token) {
+      return res.status(401).json({
+        message: "No refresh token",
+      });
+    }
+
+    const decoded = jwt.verify(
+      token,
+      process.env.JWT_REFRESH_SECRET
+    );
+
+    let account;
+
+    if (decoded.role === "deliveryPartner") {
+      account = await DeliveryBoy.findById(decoded.id);
+
+      if (!account) {
+        return res.status(401).json({
+          message: "Delivery Partner not found",
+        });
+      }
+
+      if (!account.isVerified) {
+        return res.status(403).json({
+          message: "Delivery Partner not verified",
+        });
+      }
+    } else {
+      account = await User.findById(decoded.id);
+
+      if (!account) {
+        return res.status(401).json({
+          message: "User not found",
+        });
+      }
+    }
+
+    const { accessToken, refreshToken } =
+      generateTokens(account, decoded.role);
 
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
@@ -147,9 +326,20 @@ router.post("/refresh", (req, res) => {
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
-    res.json({ accessToken });
-  } catch {
-    res.status(401).json({ message: "Invalid refresh token" });
+    res.json({
+      accessToken,
+      role: decoded.role,
+      user: {
+        _id: account._id,
+        name: account.name,
+        email: account.email,
+        role: decoded.role,
+      },
+    });
+  } catch (err) {
+    res.status(401).json({
+      message: "Invalid refresh token",
+    });
   }
 });
 

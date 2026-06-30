@@ -8,11 +8,11 @@ const LayoutDGFlake = () => {
     <main className="App">
       <Header />
       <div className="main-Layout">
-        <Box width={'20vw'} bgcolor={"#F4F4F4"} >
-      <Sidebar />
+        <Box width={"20vw"} bgcolor={"#F4F4F4"}>
+          <Sidebar />
         </Box>
-        <Box width={'80vw'}>
-      <Outlet />
+        <Box width={"80vw"}>
+          <Outlet />
         </Box>
       </div>
     </main>

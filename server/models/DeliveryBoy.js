@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import bcrypt from "bcrypt";
 
 const deliveryBoySchema = new mongoose.Schema(
   {
@@ -134,5 +135,17 @@ const deliveryBoySchema = new mongoose.Schema(
     timestamps: true,
   },
 );
+
+deliveryBoySchema.pre("save", async function (next) {
+  if (!this.isModified("password")) return next();
+
+  this.password = await bcrypt.hash(this.password, 10);
+
+  next();
+});
+
+deliveryBoySchema.methods.comparePassword = function (plain) {
+  return bcrypt.compare(plain, this.password);
+};
 
 export default mongoose.model("DeliveryBoy", deliveryBoySchema);

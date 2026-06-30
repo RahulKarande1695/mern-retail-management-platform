@@ -11,7 +11,6 @@ const userSchema = new mongoose.Schema({
   email: {
     type: String,
     required: true,
-    unique: true,
   },
 
   password: {
@@ -36,5 +35,15 @@ userSchema.pre("save", async function (next) {
 userSchema.methods.comparePassword = function (plain) {
   return bcrypt.compare(plain, this.password);
 };
+
+userSchema.index(
+  {
+    email: 1,
+    role: 1,
+  },
+  {
+    unique: true,
+  },
+);
 
 export default mongoose.model("User", userSchema);

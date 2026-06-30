@@ -6,11 +6,29 @@ const api = axios.create({
 });
 
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem("token");
+  const role = sessionStorage.getItem("currentRole");
+
+  let token = "";
+
+  switch (role) {
+    case "shop":
+      token = localStorage.getItem("shopToken");
+      break;
+
+    case "customer":
+      token = localStorage.getItem("customerToken");
+      break;
+
+    case "deliveryPartner":
+      token = localStorage.getItem("deliveryPartnerToken");
+      break;
+
+    default:
+      token = "";
+  }
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
-
   return config;
 });
 
@@ -31,14 +49,44 @@ api.interceptors.response.use(
 
       try {
         const res = await api.post("/auth/refresh");
-        console.log(res,"res..")
+        console.log(res, "res..");
         const newToken = res.data.accessToken;
-        localStorage.setItem("token", res.data.accessToken);
-        localStorage.setItem("user", JSON.stringify(res.data.user));
+        const role = res.data.role;
+
+        switch (role) {
+          case "shop":
+            localStorage.setItem("shopToken", newToken);
+            localStorage.setItem("shop", JSON.stringify(res.data.user));
+            break;
+
+          case "customer":
+            localStorage.setItem("customerToken", newToken);
+            localStorage.setItem("customer", JSON.stringify(res.data.user));
+            break;
+
+          case "deliveryPartner":
+            localStorage.setItem("deliveryPartnerToken", newToken);
+
+            localStorage.setItem(
+              "deliveryPartner",
+              JSON.stringify(res.data.deliveryPartner),
+            );
+            break;
+        }
+
         originalRequest.headers.Authorization = `Bearer ${newToken}`;
+
         return api(originalRequest);
       } catch (err) {
-        localStorage.removeItem("token");
+        localStorage.removeItem("shopToken");
+        localStorage.removeItem("customerToken");
+        localStorage.removeItem("deliveryPartnerToken");
+
+        localStorage.removeItem("shop");
+        localStorage.removeItem("customer");
+        localStorage.removeItem("deliveryPartner");
+
+        sessionStorage.removeItem("currentRole");
         return Promise.reject(err);
       }
     }

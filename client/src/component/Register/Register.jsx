@@ -76,7 +76,6 @@ const Register = () => {
         onChange={handleChange}
       >
         <MenuItem value="customer">Customer</MenuItem>
-
         <MenuItem value="shop">Shop Owner</MenuItem>
       </TextField>
 

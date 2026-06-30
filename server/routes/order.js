@@ -100,15 +100,13 @@ router.post(
       const { acceptedQty } = req.body;
 
       const order = await Order.findById(req.params.orderId);
-
+console.log(order.toObject());
       if (!order) {
         return res.status(404).json({
           message: "Order not found",
         });
       }
-
       const item = order.items.id(req.params.itemId);
-
       if (!item) {
         return res.status(404).json({
           message: "Item not found",

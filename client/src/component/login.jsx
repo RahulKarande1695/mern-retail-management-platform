@@ -7,6 +7,7 @@ import {
   InputLabel,
   OutlinedInput,
   TextField,
+  MenuItem,
 } from "@mui/material";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
@@ -20,6 +21,7 @@ const LoginUi = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [role, setRole] = useState("customer");
 
   const navigate = useNavigate();
 
@@ -32,16 +34,21 @@ const LoginUi = () => {
   };
 
   const handleLogin = async () => {
+    if (!role) {
+      return alert("Please select login role.");
+    }
     try {
       const res = await api.post("/auth/login", {
         email,
         password,
+        role,
       });
 
-      console.log(res.data);
-
       navigate("/verify-otp", {
-        state: { email },
+        state: {
+          email,
+          role,
+        },
       });
     } catch (err) {
       console.error(err);
@@ -57,7 +64,7 @@ const LoginUi = () => {
       </Box>
 
       <Box textAlign="center" mb={3}>
-        <h1>Welcome to Digitalflake Admin</h1>
+        <h1>Welcome to Digitalflake</h1>
       </Box>
 
       <Box mb={2}>
@@ -96,7 +103,20 @@ const LoginUi = () => {
           <p onClick={() => navigate("forgot")}>Forgot Password?</p>
         </Box>
       </Box>
-      <Box display="flex" justifyContent="center" gap="1vw"> 
+      <Box mb={2}>
+        <TextField
+          select
+          fullWidth
+          label="Login As"
+          value={role}
+          onChange={(e) => setRole(e.target.value)}
+        >
+          <MenuItem value="customer">Customer</MenuItem>
+          <MenuItem value="shop">Shop</MenuItem>
+          <MenuItem value="deliveryPartner">Delivery Partner</MenuItem>
+        </TextField>
+      </Box>
+      <Box display="flex" justifyContent="center" gap="1vw">
         <Button variant="contained" onClick={handleLogin} fullWidth>
           Login
         </Button>

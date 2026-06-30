@@ -22,7 +22,7 @@ import { useParams } from "react-router-dom";
 
 import api from "../../api/axios";
 
-const OrderDetails = () => {
+const DeliveryOrderDetails = () => {
   const { id } = useParams();
 
   const [order, setOrder] = useState(null);
@@ -299,4 +299,4 @@ const OrderDetails = () => {
   );
 };
 
-export default OrderDetails;
+export default DeliveryOrderDetails;

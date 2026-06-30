@@ -10,11 +10,7 @@ import {
   Typography,
 } from "@mui/material";
 
-import {
-  Visibility,
-  VisibilityOff,
-  LocalShipping,
-} from "@mui/icons-material";
+import { Visibility, VisibilityOff, LocalShipping } from "@mui/icons-material";
 
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -25,9 +21,7 @@ const Login = () => {
   const navigate = useNavigate();
 
   const [loading, setLoading] = useState(false);
-
   const [showPassword, setShowPassword] = useState(false);
-
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -46,27 +40,22 @@ const Login = () => {
     try {
       setLoading(true);
 
-      const res = await api.post(
-        "/deliveryBoy/login",
-        formData
-      );
+      const res = await api.post("/deliveryBoy/login", formData);
+
+      localStorage.setItem("deliveryPartnerToken", res.data.accessToken);
 
       localStorage.setItem(
-        "token",
-        res.data.token
+        "deliveryPartner",
+        JSON.stringify(res.data.deliveryPartner),
       );
 
-      localStorage.setItem(
-        "deliveryBoy",
-        JSON.stringify(res.data.deliveryBoy)
-      );
+      sessionStorage.setItem("currentRole", "deliveryPartner");
+
+      navigate("/delivery/dashboard");
 
       navigate("/delivery/dashboard");
     } catch (err) {
-      alert(
-        err.response?.data?.message ||
-          "Login Failed"
-      );
+      alert(err.response?.data?.message || "Login Failed");
     } finally {
       setLoading(false);
     }
@@ -89,10 +78,7 @@ const Login = () => {
         }}
       >
         <CardContent sx={{ p: 4 }}>
-          <Stack
-            spacing={3}
-            alignItems="center"
-          >
+          <Stack spacing={3} alignItems="center">
             <LocalShipping
               sx={{
                 fontSize: 55,
@@ -100,18 +86,11 @@ const Login = () => {
               color="primary"
             />
 
-            <Typography
-              variant="h5"
-              fontWeight={700}
-            >
+            <Typography variant="h5" fontWeight={700}>
               Delivery Partner Login
             </Typography>
 
-            <Box
-              component="form"
-              width="100%"
-              onSubmit={handleSubmit}
-            >
+            <Box component="form" width="100%" onSubmit={handleSubmit}>
               <Stack spacing={2.5}>
                 <TextField
                   fullWidth
@@ -125,11 +104,7 @@ const Login = () => {
                 <TextField
                   fullWidth
                   label="Password"
-                  type={
-                    showPassword
-                      ? "text"
-                      : "password"
-                  }
+                  type={showPassword ? "text" : "password"}
                   name="password"
                   value={formData.password}
                   onChange={handleChange}
@@ -138,17 +113,9 @@ const Login = () => {
                     endAdornment: (
                       <InputAdornment position="end">
                         <IconButton
-                          onClick={() =>
-                            setShowPassword(
-                              !showPassword
-                            )
-                          }
+                          onClick={() => setShowPassword(!showPassword)}
                         >
-                          {showPassword ? (
-                            <VisibilityOff />
-                          ) : (
-                            <Visibility />
-                          )}
+                          {showPassword ? <VisibilityOff /> : <Visibility />}
                         </IconButton>
                       </InputAdornment>
                     ),
@@ -161,9 +128,7 @@ const Login = () => {
                   size="large"
                   disabled={loading}
                 >
-                  {loading
-                    ? "Logging..."
-                    : "Login"}
+                  {loading ? "Logging..." : "Login"}
                 </Button>
               </Stack>
             </Box>
