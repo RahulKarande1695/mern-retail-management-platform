@@ -11,14 +11,16 @@ const steps = [
   "Placed",
   "Accepted",
   "Packed",
-  "Picked",
+  "Assigned",
+  "Accepted By Delivery Partner",
+  "Picked Up",
   "Delivered",
 ];
 
 const TrackingStepper = ({
   trackingHistory = [],
 }) => {
-
+console.log(trackingHistory,"trackingHistory")
   // Get completed statuses from tracking history
   const completedSteps =
     trackingHistory.map(

@@ -4,8 +4,29 @@ import jwt from "jsonwebtoken";
 import DeliveryBoy from "../models/DeliveryBoy.js";
 import authMiddleware from "../middleware/authMiddleware.js";
 import upload from "../middleware/upload.js";
+import Order from "../models/Order.js";
 
 const router = express.Router();
+
+router.get("/orders", authMiddleware, async (req, res) => {
+  try {
+    const orders = await Order.find({
+      deliveryBoy: req.user.id,
+      status: true,
+    })
+      .populate("customer", "name mobile")
+      .populate("items.product")
+      .sort({
+        assignedAt: -1,
+      });
+
+    res.json(orders);
+  } catch (err) {
+    res.status(500).json({
+      message: err.message,
+    });
+  }
+});
 
 router.get(
   "/pending",

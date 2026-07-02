@@ -47,14 +47,14 @@ const AddressSection = ({
           </Button>
         </Box>
 
-        {addresses.length === 0 && (
+        {addresses?.length === 0 && (
           <Typography color="text.secondary">
             No address found.
           </Typography>
         )}
 
         <Stack spacing={2}>
-          {addresses.map((address) => (
+          {addresses?.map((address) => (
             <Card
               key={address._id}
               sx={{

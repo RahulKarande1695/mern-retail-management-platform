@@ -6,13 +6,13 @@ import api from "../../api/axios";
 import AddressSection from "./AddressSection";
 import BillSummary from "./BillSummary";
 import PaymentSection from "./PaymentSection";
+import { useNavigate } from "react-router-dom";
 
 const Checkout = () => {
+  const navigate = useNavigate();
   const [addresses, setAddresses] = useState([]);
   const [cart, setCart] = useState(null);
-
   const [selectedAddress, setSelectedAddress] = useState("");
-
   const [paymentMethod, setPaymentMethod] = useState("COD");
 
   useEffect(() => {
@@ -23,11 +23,8 @@ const Checkout = () => {
   const getAddresses = async () => {
     try {
       const res = await api.get("/address");
-
       setAddresses(res.data);
-
       const defaultAddress = res.data.find((item) => item.isDefault);
-
       if (defaultAddress) {
         setSelectedAddress(defaultAddress._id);
       }
@@ -57,6 +54,7 @@ const Checkout = () => {
         state: {
           order: res.data,
         },
+        replace: true,
       });
     } catch (err) {
       alert(err.response?.data?.message || "Something went wrong");

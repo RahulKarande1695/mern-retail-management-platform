@@ -5,8 +5,6 @@ import IconButton from "@mui/material/IconButton";
 import SearchIcon from "@mui/icons-material/Search";
 import { Box, Button } from "@mui/material";
 import { Link } from "react-router-dom";
-import { setCategory } from "../redux/slice/categorySlice";
-import { setProduct } from "../redux/slice/productSlice";
 import api from "../api/axios";
 
 const SearchBar = (props) => {

@@ -16,7 +16,6 @@ import api from "../../api/axios";
 
 const AssignedOrders = () => {
   const navigate = useNavigate();
-
   const [orders, setOrders] = useState([]);
 
   useEffect(() => {
@@ -26,10 +25,8 @@ const AssignedOrders = () => {
   const getAssignedOrders = async () => {
     try {
       // API Later
-      // const res = await api.get("/deliveryBoy/orders");
-      // setOrders(res.data);
-
-      setOrders([]);
+      const res = await api.get("/deliveryBoy/orders");
+      setOrders(res.data);
     } catch (err) {
       console.log(err);
     }

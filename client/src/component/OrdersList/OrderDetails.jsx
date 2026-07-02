@@ -38,8 +38,7 @@ const OrderDetails = () => {
 
   const getOrder = async () => {
     const res = await api.get(`/orders/${id}`);
-  console.log("Order Response", res.data);
-  console.log("Items", res.data.items);
+    console.log("GET API item id:", res.data.items[0]._id);
     setOrder(res.data);
   };
 
@@ -76,13 +75,9 @@ const OrderDetails = () => {
   };
 
   const handleAccept = async (item) => {
-     console.log("UI Item ID:", item._id);
-  const latest = await api.get(`/orders/${order._id}`);
-  console.log("Latest API Item ID:", latest.data.items[0]._id);
     await api.post(`/orders/${order._id}/items/${item._id}/accept`, {
       acceptedQty: 1,
     });
-
     getOrder();
   };
 
@@ -202,49 +197,49 @@ const OrderDetails = () => {
         </Table>
       </TableContainer>
 
-     {canAssign && (
-          <Box
-            mt={4}
+      {canAssign && (
+        <Box
+          mt={4}
+          sx={{
+            border: "1px solid #ddd",
+            p: 2,
+            borderRadius: 2,
+          }}
+        >
+          <h3>Assign Delivery Boy</h3>
+
+          <FormControl
+            fullWidth
             sx={{
-              border: "1px solid #ddd",
-              p: 2,
-              borderRadius: 2,
+              mt: 2,
             }}
           >
-            <h3>Assign Delivery Boy</h3>
+            <InputLabel>Delivery Boy</InputLabel>
 
-            <FormControl
-              fullWidth
-              sx={{
-                mt: 2,
-              }}
+            <Select
+              value={selectedDeliveryBoy}
+              label="Delivery Boy"
+              onChange={(e) => setSelectedDeliveryBoy(e.target.value)}
             >
-              <InputLabel>Delivery Boy</InputLabel>
+              {deliveryBoys.map((boy) => (
+                <MenuItem key={boy._id} value={boy._id}>
+                  {boy.name} ({boy.vehicleType})
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
 
-              <Select
-                value={selectedDeliveryBoy}
-                label="Delivery Boy"
-                onChange={(e) => setSelectedDeliveryBoy(e.target.value)}
-              >
-                {deliveryBoys.map((boy) => (
-                  <MenuItem key={boy._id} value={boy._id}>
-                    {boy.name} ({boy.vehicleType})
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-
-            <Button
-              variant="contained"
-              sx={{
-                mt: 2,
-              }}
-              onClick={assignDeliveryBoy}
-            >
-              Assign
-            </Button>
-          </Box>
-        )}
+          <Button
+            variant="contained"
+            sx={{
+              mt: 2,
+            }}
+            onClick={assignDeliveryBoy}
+          >
+            Assign
+          </Button>
+        </Box>
+      )}
       <Box mt={4}>
         <h3>Tracking History</h3>
         {order.items?.map((item) => (

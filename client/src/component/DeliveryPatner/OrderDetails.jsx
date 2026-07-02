@@ -10,12 +10,7 @@ import {
   Typography,
 } from "@mui/material";
 
-import {
-  CheckCircle,
-  LocalShipping,
-  Phone,
-  Room,
-} from "@mui/icons-material";
+import { CheckCircle, LocalShipping, Phone, Room } from "@mui/icons-material";
 
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
@@ -24,9 +19,12 @@ import api from "../../api/axios";
 
 const DeliveryOrderDetails = () => {
   const { id } = useParams();
-
   const [order, setOrder] = useState(null);
-
+  const lastTrackingStatus =
+  order?.trackingHistory?.length > 0
+    ? order.trackingHistory[order.trackingHistory.length - 1].status
+    : "";
+    
   useEffect(() => {
     getOrder();
   }, []);
@@ -43,9 +41,11 @@ const DeliveryOrderDetails = () => {
 
   const handleAccept = async () => {
     try {
-      // API Later
+      await api.post(`/orders/${order._id}/accept-delivery`);
 
-      alert("Accept Delivery API");
+      alert("Delivery Accepted");
+
+      getOrder();
     } catch (err) {
       console.log(err);
     }
@@ -53,9 +53,11 @@ const DeliveryOrderDetails = () => {
 
   const handlePicked = async () => {
     try {
-      // API Later
+      await api.post(`/orders/${order._id}/picked`);
 
-      alert("Picked API");
+      alert("Order Picked");
+
+      getOrder();
     } catch (err) {
       console.log(err);
     }
@@ -63,9 +65,11 @@ const DeliveryOrderDetails = () => {
 
   const handleDelivered = async () => {
     try {
-      // API Later
+      await api.post(`/orders/${order._id}/delivered`);
 
-      alert("Delivered API");
+      alert("Order Delivered");
+
+      getOrder();
     } catch (err) {
       console.log(err);
     }
@@ -85,31 +89,21 @@ const DeliveryOrderDetails = () => {
         <Grid item xs={12} md={6}>
           <Card>
             <CardContent>
-
-              <Typography variant="h6">
-                Customer Details
-              </Typography>
+              <Typography variant="h6">Customer Details</Typography>
 
               <Divider sx={{ my: 2 }} />
 
               <Typography>
-                <strong>Name :</strong>{" "}
-                {order.customer?.name}
+                <strong>Name :</strong> {order.customer?.name}
               </Typography>
 
               <Typography>
-                <strong>Mobile :</strong>{" "}
-                {order.customer?.mobile}
+                <strong>Mobile :</strong> {order.customer?.mobile}
               </Typography>
 
-              <Button
-                startIcon={<Phone />}
-                sx={{ mt: 2 }}
-                variant="contained"
-              >
+              <Button startIcon={<Phone />} sx={{ mt: 2 }} variant="contained">
                 Call Customer
               </Button>
-
             </CardContent>
           </Card>
         </Grid>
@@ -119,45 +113,25 @@ const DeliveryOrderDetails = () => {
         <Grid item xs={12} md={6}>
           <Card>
             <CardContent>
-
-              <Typography variant="h6">
-                Delivery Address
-              </Typography>
+              <Typography variant="h6">Delivery Address</Typography>
 
               <Divider sx={{ my: 2 }} />
 
-              <Typography>
-                {order.deliveryAddress?.houseNo}
-              </Typography>
+              <Typography>{order.deliveryAddress?.houseNo}</Typography>
 
-              <Typography>
-                {order.deliveryAddress?.area}
-              </Typography>
+              <Typography>{order.deliveryAddress?.area}</Typography>
 
-              <Typography>
-                {order.deliveryAddress?.city}
-              </Typography>
+              <Typography>{order.deliveryAddress?.city}</Typography>
 
-              <Typography>
-                {order.deliveryAddress?.district}
-              </Typography>
+              <Typography>{order.deliveryAddress?.district}</Typography>
 
-              <Typography>
-                {order.deliveryAddress?.state}
-              </Typography>
+              <Typography>{order.deliveryAddress?.state}</Typography>
 
-              <Typography>
-                {order.deliveryAddress?.pincode}
-              </Typography>
+              <Typography>{order.deliveryAddress?.pincode}</Typography>
 
-              <Button
-                sx={{ mt: 2 }}
-                startIcon={<Room />}
-                variant="outlined"
-              >
+              <Button sx={{ mt: 2 }} startIcon={<Room />} variant="outlined">
                 Open Google Maps
               </Button>
-
             </CardContent>
           </Card>
         </Grid>
@@ -167,10 +141,7 @@ const DeliveryOrderDetails = () => {
         <Grid item xs={12}>
           <Card>
             <CardContent>
-
-              <Typography variant="h6">
-                Ordered Items
-              </Typography>
+              <Typography variant="h6">Ordered Items</Typography>
 
               <Divider sx={{ my: 2 }} />
 
@@ -184,26 +155,16 @@ const DeliveryOrderDetails = () => {
                   }}
                 >
                   <Box>
+                    <Typography fontWeight={600}>{item.productName}</Typography>
 
-                    <Typography fontWeight={600}>
-                      {item.productName}
-                    </Typography>
-
-                    <Typography
-                      variant="body2"
-                    >
+                    <Typography variant="body2">
                       Qty : {item.quantity}
                     </Typography>
-
                   </Box>
 
-                  <Typography fontWeight={700}>
-                    ₹{item.price}
-                  </Typography>
-
+                  <Typography fontWeight={700}>₹{item.price}</Typography>
                 </Stack>
               ))}
-
             </CardContent>
           </Card>
         </Grid>
@@ -213,30 +174,22 @@ const DeliveryOrderDetails = () => {
         <Grid item xs={12}>
           <Card>
             <CardContent>
-
-              <Typography variant="h6">
-                Tracking History
-              </Typography>
+              <Typography variant="h6">Tracking History</Typography>
 
               <Divider sx={{ my: 2 }} />
 
-              {order.trackingHistory.map(
-                (track, index) => (
-                  <Chip
-                    key={index}
-                    sx={{
-                      mr: 1,
-                      mb: 1,
-                    }}
-                    icon={
-                      <CheckCircle />
-                    }
-                    label={track.status}
-                    color="success"
-                  />
-                )
-              )}
-
+              {order.trackingHistory.map((track, index) => (
+                <Chip
+                  key={index}
+                  sx={{
+                    mr: 1,
+                    mb: 1,
+                  }}
+                  icon={<CheckCircle />}
+                  label={track.status}
+                  color="success"
+                />
+              ))}
             </CardContent>
           </Card>
         </Grid>
@@ -246,51 +199,23 @@ const DeliveryOrderDetails = () => {
         <Grid item xs={12}>
           <Card>
             <CardContent>
-
-              <Typography variant="h6">
-                Delivery Actions
-              </Typography>
+              <Typography variant="h6">Delivery Actions</Typography>
 
               <Divider sx={{ my: 2 }} />
 
-              <Stack
-                direction="row"
-                spacing={2}
-              >
-                <Button
-                  variant="contained"
-                  onClick={
-                    handleAccept
-                  }
-                >
-                  Accept Delivery
-                </Button>
+              <Stack direction="row" spacing={2}>
+                {lastTrackingStatus === "Assigned" && (
+                  <Button onClick={handleAccept}>Accept Delivery</Button>
+                )}
 
-                <Button
-                  variant="contained"
-                  color="warning"
-                  startIcon={
-                    <LocalShipping />
-                  }
-                  onClick={
-                    handlePicked
-                  }
-                >
-                  Picked
-                </Button>
+                {lastTrackingStatus === "Accepted By Delivery Partner" && (
+                  <Button onClick={handlePicked}>Picked Up</Button>
+                )}
 
-                <Button
-                  variant="contained"
-                  color="success"
-                  onClick={
-                    handleDelivered
-                  }
-                >
-                  Delivered
-                </Button>
-
+                {lastTrackingStatus === "Picked Up" && (
+                  <Button onClick={handleDelivered}>Delivered</Button>
+                )}
               </Stack>
-
             </CardContent>
           </Card>
         </Grid>

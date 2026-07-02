@@ -187,15 +187,36 @@ const orderSchema = new mongoose.Schema(
       default: null,
     },
 
+    // future sathi aahe lifecycle synchronize krnyasathi delivery boy status sathi
+    // deliveryStatus: {
+    //   type: String,
+    //   enum: ["Assigned", "Accepted", "Picked", "Delivered"],
+    //   default: "Assigned",
+    // },
+
     assignedAt: Date,
-
     pickedAt: Date,
-
     deliveredAt: Date,
   },
   {
     timestamps: true,
   },
 );
+
+orderSchema.pre("save", function (next) {
+  console.log("===== ORDER SAVE =====");
+  console.log("Order:", this.orderNumber);
+  console.log(
+    "Items:",
+    this.items.map((i) => i._id?.toString()),
+  );
+  console.trace(); // <-- khup important
+  next();
+});
+
+orderSchema.pre("init", function (data) {
+  console.log("INIT");
+  console.log(data.items?.map((i) => i._id));
+});
 
 export default mongoose.model("Order", orderSchema);

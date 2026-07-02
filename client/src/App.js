@@ -31,6 +31,10 @@ import DeliveryOrderDetails from "./component/DeliveryPatner/OrderDetails";
 import History from "./component/DeliveryPatner/History";
 import Profile from "./component/DeliveryPatner/Profile";
 import ChangePassword from "./component/DeliveryPatner/ChangePassword";
+import Checkout from "./component/Payment/Checkout";
+import AddressForm from "./component/Payment/AddressForm";
+import CustomerOrderDetails from "./component/CustomerOrders/CustomerOrderDetails";
+import OrderSuccess from "./component/Payment/OrderSuccess";
 
 function App() {
   return (
@@ -165,7 +169,6 @@ function App() {
           }
         />
       </Route>
-
       // Customer
       <Route path="customer" element={<LayoutDGFlake />}>
         <Route
@@ -184,8 +187,48 @@ function App() {
             </RoleProtectedRoute>
           }
         />
+        <Route
+          path="checkout"
+          element={
+            <RoleProtectedRoute role="customer">
+              <Checkout />
+            </RoleProtectedRoute>
+          }
+        />
+        <Route
+          path="address/add"
+          element={
+            <RoleProtectedRoute role="customer">
+              <AddressForm />
+            </RoleProtectedRoute>
+          }
+        />
+        <Route
+          path="address/edit/:id"
+          element={
+            <RoleProtectedRoute role="customer">
+              <AddressForm />
+            </RoleProtectedRoute>
+          }
+        />
+        <Route
+          path="order-success"
+          element={
+            <RoleProtectedRoute role="customer">
+              <OrderSuccess />
+            </RoleProtectedRoute>
+          }
+        />
+
+        <Route
+          path="orders/:id"
+          element={
+            <RoleProtectedRoute role="customer">
+              <CustomerOrderDetails />
+            </RoleProtectedRoute>
+          }
+        />
       </Route>
-      
       // Delivery Partenr
       <Route
         path="delivery"

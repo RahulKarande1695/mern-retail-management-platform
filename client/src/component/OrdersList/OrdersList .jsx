@@ -32,13 +32,9 @@ const OrdersList = () => {
   };
 
   const filteredOrders =
-  statusFilter === "All"
-    ? orders
-    : orders.filter(
-        (item) =>
-          item.orderStatus ===
-          statusFilter
-      );
+    statusFilter === "All"
+      ? orders
+      : orders.filter((item) => item.orderStatus === statusFilter);
 
   return (
     <Box
@@ -69,148 +65,72 @@ const OrdersList = () => {
           }}
         >
           <MenuItem value="All">All</MenuItem>
-
           <MenuItem value="Placed">New Orders</MenuItem>
-
           <MenuItem value="Processing">Processing</MenuItem>
-
           <MenuItem value="Delivered">Delivered</MenuItem>
-
           <MenuItem value="Cancelled">Cancelled</MenuItem>
         </TextField>
       </Box>
 
       <TableContainer component={Paper}>
         <Table>
-          {/* <TableHead
-            sx={{
-              background: "#FFF8B7",
-            }}
-          >
-            {orders?.map((order, index)=><TableRow key={order._id}>
-              <TableCell>{index + 1}</TableCell>
-              <TableCell>{order.orderNumber}</TableCell>
-              <TableCell>{order.customer?.name}</TableCell>
-              <TableCell>{order.items?.length}</TableCell>
-              <TableCell>₹{order.totalAmount}</TableCell>
-              <TableCell>{order.paymentStatus}</TableCell>
-              <TableCell>{order.orderStatus}</TableCell>
-              <TableCell>
-                <Button
-                  variant="contained"
-                  size="small"
-                  onClick={() => navigate(`/dgflake/orders/${order._id}`)}
-                >
-                  View
-                </Button>
-              </TableCell>
-            </TableRow>)}
-          </TableHead> */}
-
           <TableHead sx={{ background: "#FFF8B7" }}>
-  <TableRow>
-    <TableCell>Sr No</TableCell>
-    <TableCell>Order No</TableCell>
-    <TableCell>Customer</TableCell>
-    <TableCell>Items</TableCell>
-    <TableCell>Amount</TableCell>
-    <TableCell>Payment</TableCell>
-    <TableCell>Status</TableCell>
-    <TableCell>Action</TableCell>
-  </TableRow>
-</TableHead>
-
-          {/* <TableBody>
+            <TableRow>
+              <TableCell>Sr No</TableCell>
+              <TableCell>Order No</TableCell>
+              <TableCell>Customer</TableCell>
+              <TableCell>Items</TableCell>
+              <TableCell>Amount</TableCell>
+              <TableCell>Payment</TableCell>
+              <TableCell>Status</TableCell>
+              <TableCell>Delivery Status</TableCell>
+              <TableCell>Action</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
             {filteredOrders.length === 0 && (
               <TableRow>
-                <TableCell colSpan={6} align="center">
+                <TableCell colSpan={8} align="center">
                   No Orders Found
                 </TableCell>
               </TableRow>
             )}
 
-            {filteredOrders.map((order, index) => (
-              <TableRow
-                key={order._id}
-                sx={{
-                  background: "#F2F2F2",
-                }}
-              >
-                <TableCell>{index + 1}</TableCell>
-
-                <TableCell align="right">{order.orderNumber}</TableCell>
-
-                <TableCell align="right">{order.customer?.name}</TableCell>
-
-                <TableCell align="right">₹{order.totalAmount}</TableCell>
-
-                <TableCell align="right">
-                  <Chip size="small" label={order.orderStatus} />
-                </TableCell>
-
-                <TableCell align="right">
-                  {new Date(order.createdAt).toLocaleDateString()}
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody> */}
-          <TableBody>
-  {filteredOrders.length === 0 && (
-    <TableRow>
-      <TableCell colSpan={8} align="center">
-        No Orders Found
-      </TableCell>
-    </TableRow>
-  )}
-
-  {filteredOrders.map((order, index) => (
-    <TableRow key={order._id}>
-      <TableCell>{index + 1}</TableCell>
-
-      <TableCell>{order.orderNumber}</TableCell>
-
-      <TableCell>
-        {order.customer?.name}
-      </TableCell>
-
-      <TableCell>
-        {order.items?.length}
-      </TableCell>
-
-      <TableCell>
-        ₹{order.totalAmount}
-      </TableCell>
-
-      <TableCell>
-        <Chip
-          size="small"
-          label={order.paymentStatus}
-        />
-      </TableCell>
-
-      <TableCell>
-        <Chip
-          size="small"
-          label={order.orderStatus}
-        />
-      </TableCell>
-
-      <TableCell>
-        <Button
-          size="small"
-          variant="contained"
-          onClick={() =>
-            navigate(
-              `/dgflake/orders/${order._id}`
-            )
-          }
-        >
-          View
-        </Button>
-      </TableCell>
-    </TableRow>
-  ))}
-</TableBody>
+            {filteredOrders.map((order, index) => {
+              const deliveryStatus =
+                order.trackingHistory.length > 0
+                  ? order.trackingHistory[order.trackingHistory.length - 1]
+                      .status
+                  : "-";
+              return (
+                <TableRow key={order._id}>
+                  <TableCell>{index + 1}</TableCell>
+                  <TableCell>{order.orderNumber}</TableCell>
+                  <TableCell>{order.customer?.name}</TableCell>
+                  <TableCell>{order.items?.length}</TableCell>
+                  <TableCell>₹{order.totalAmount}</TableCell>
+                  <TableCell>
+                    <Chip size="small" label={order.paymentStatus} />
+                  </TableCell>
+                  <TableCell>
+                    <Chip size="small" label={order.orderStatus} />
+                  </TableCell>
+                  <TableCell>
+                    <Chip size="small" label={deliveryStatus} color="info" />
+                  </TableCell>
+                  <TableCell>
+                    <Button
+                      size="small"
+                      variant="contained"
+                      onClick={() => navigate(`/dgflake/orders/${order._id}`)}
+                    >
+                      View
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              );
+            })}
+          </TableBody>
         </Table>
       </TableContainer>
     </Box>
