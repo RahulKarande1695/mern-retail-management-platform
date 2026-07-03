@@ -11,6 +11,11 @@ export const sidebarMenus = {
       menu: "Home",
       link: "",
     },
+        {
+      icon: homeMenu,
+      menu: "Dashboard",
+      link: "dashboard",
+    },
     {
       icon: category,
       menu: "Categories",
@@ -35,6 +40,16 @@ export const sidebarMenus = {
       icon: orderMenu,
       menu: "Delivery Partner",
       link: "deliveryBoy",
+    },
+    {
+      icon: orderMenu,
+      menu: "Return Orders",
+      link: "returns",
+    },
+    {
+      icon: orderMenu,
+      menu: "Approved Returns",
+      link: "returns/approved",
     },
   ],
 

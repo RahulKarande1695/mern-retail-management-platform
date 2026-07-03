@@ -19,19 +19,13 @@ const PaymentSection = ({
   return (
     <Card>
       <CardContent>
-        <Typography
-          variant="h6"
-          fontWeight={600}
-          mb={2}
-        >
+        <Typography variant="h6" fontWeight={600} mb={2}>
           Payment Method
         </Typography>
 
         <RadioGroup
           value={paymentMethod}
-          onChange={(e) =>
-            setPaymentMethod(e.target.value)
-          }
+          onChange={(e) => setPaymentMethod(e.target.value)}
         >
           <FormControlLabel
             value="COD"
@@ -39,11 +33,7 @@ const PaymentSection = ({
             label="Cash On Delivery"
           />
 
-          <FormControlLabel
-            value="UPI"
-            control={<Radio />}
-            label="UPI"
-          />
+          <FormControlLabel value="UPI" control={<Radio />} label="UPI" />
 
           <FormControlLabel
             value="CARD"
@@ -57,31 +47,20 @@ const PaymentSection = ({
         {/* Future Payment Information */}
 
         {paymentMethod === "COD" && (
-          <Typography
-            variant="body2"
-            color="text.secondary"
-          >
+          <Typography variant="body2" color="text.secondary">
             Pay cash when your order is delivered.
           </Typography>
         )}
 
         {paymentMethod === "UPI" && (
-          <Typography
-            variant="body2"
-            color="text.secondary"
-          >
-            UPI payment will be integrated in the
-            next phase.
+          <Typography variant="body2" color="text.secondary">
+            UPI payment will be integrated in the next phase.
           </Typography>
         )}
 
         {paymentMethod === "CARD" && (
-          <Typography
-            variant="body2"
-            color="text.secondary"
-          >
-            Card payment will be integrated in the
-            next phase.
+          <Typography variant="body2" color="text.secondary">
+            Card payment will be integrated in the next phase.
           </Typography>
         )}
 
@@ -93,20 +72,13 @@ const PaymentSection = ({
             disabled={!selectedAddress}
             onClick={handlePayment}
           >
-             {paymentMethod === "COD"
-    ? "Place Order"
-    : "Pay Now"}
+            {paymentMethod === "COD" ? "Place Order" : "Pay Now"}
           </Button>
         </Box>
 
         {!selectedAddress && (
-          <Typography
-            mt={2}
-            color="error"
-            fontSize={14}
-          >
-            Please select a delivery address before
-            proceeding.
+          <Typography mt={2} color="error" fontSize={14}>
+            Please select a delivery address before proceeding.
           </Typography>
         )}
       </CardContent>

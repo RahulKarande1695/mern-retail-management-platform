@@ -12,13 +12,14 @@ import {
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import api from "../../api/axios";
+import MapPicker from "../map/MapPicker";
 
 const AddressForm = () => {
   const navigate = useNavigate();
   const { id } = useParams();
 
   const isEdit = Boolean(id);
-
+  const [location, setLocation] = useState(null);
   const [form, setForm] = useState({
     fullName: "",
     mobile: "",
@@ -68,10 +69,12 @@ const AddressForm = () => {
       }
 
       alert(
-        isEdit
-          ? "Address Updated Successfully"
-          : "Address Added Successfully"
+        isEdit ? "Address Updated Successfully" : "Address Added Successfully",
       );
+      await api.post("/address", {
+        ...form,
+        location,
+      });
 
       navigate("/customer/checkout");
     } catch (err) {
@@ -88,7 +91,6 @@ const AddressForm = () => {
         </Typography>
 
         <Grid container spacing={2}>
-
           <Grid item xs={12} md={6}>
             <TextField
               fullWidth
@@ -221,15 +223,9 @@ const AddressForm = () => {
               label="Set as Default Address"
             />
           </Grid>
-
         </Grid>
 
-        <Box
-          display="flex"
-          justifyContent="flex-end"
-          gap={2}
-          mt={3}
-        >
+        <Box display="flex" justifyContent="flex-end" gap={2} mt={3}>
           <Button
             variant="outlined"
             onClick={() => navigate("/customer/checkout")}
@@ -237,14 +233,12 @@ const AddressForm = () => {
             Cancel
           </Button>
 
-          <Button
-            variant="contained"
-            onClick={handleSubmit}
-          >
+          <Button variant="contained" onClick={handleSubmit}>
             {isEdit ? "Update" : "Save"}
           </Button>
         </Box>
       </Paper>
+      <MapPicker location={location} setLocation={setLocation} />
     </Box>
   );
 };

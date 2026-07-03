@@ -113,6 +113,7 @@ router.post("/", authMiddleware, async (req, res) => {
             houseNo: address.houseNo,
             area: address.area,
             landmark: address.landmark,
+            location: address.location,
           },
           trackingHistory: [
             {

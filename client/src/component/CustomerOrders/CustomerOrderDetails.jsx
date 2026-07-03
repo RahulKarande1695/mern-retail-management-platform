@@ -10,12 +10,12 @@ import {
 } from "@mui/material";
 
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import api from "../../api/axios";
 
 const CustomerOrderDetails = () => {
   const { id } = useParams();
-
+  const navigate = useNavigate();
   const [order, setOrder] = useState(null);
 
   useEffect(() => {
@@ -27,6 +27,40 @@ const CustomerOrderDetails = () => {
       const res = await api.get(`/orders/${id}`);
 
       setOrder(res.data);
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  const downloadInvoice = async () => {
+    try {
+      const res = await api.get(`/orders/${order._id}/invoice`, {
+        responseType: "blob",
+      });
+
+      const url = window.URL.createObjectURL(new Blob([res.data]));
+
+      const link = document.createElement("a");
+
+      link.href = url;
+
+      link.setAttribute("download", `${order.orderNumber}.pdf`);
+
+      document.body.appendChild(link);
+
+      link.click();
+
+      link.remove();
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  const repeatOrder = async () => {
+    try {
+      await api.post(`/orders/${order._id}/repeat`);
+      alert("Products added to cart");
+      navigate("/customer/cart");
     } catch (err) {
       console.log(err);
     }
@@ -120,18 +154,30 @@ const CustomerOrderDetails = () => {
 
               <Box flex={1}>
                 <Typography variant="h6">{item.productName}</Typography>
-
                 <Typography>Qty : {item.quantity}</Typography>
-
                 <Typography>Accepted : {item.acceptedQty}</Typography>
-
                 <Typography>Cancelled : {item.cancelledQty}</Typography>
-
                 <Typography color="primary" fontWeight={700}>
                   ₹{item.price}
                 </Typography>
 
                 <Chip sx={{ mt: 2 }} label={item.itemStatus} />
+                {/* Return Status */}
+                {item.returnStatus !== "None" && (
+                  <Box mt={2}>
+                    <Typography fontWeight={600}>Return Status</Typography>
+                    <Chip
+                      label={item.returnStatus}
+                      color={
+                        item.returnStatus === "Returned"
+                          ? "success"
+                          : item.returnStatus === "Rejected"
+                            ? "error"
+                            : "warning"
+                      }
+                    />
+                  </Box>
+                )}
               </Box>
             </Box>
 
@@ -161,9 +207,43 @@ const CustomerOrderDetails = () => {
                 </Box>
               ))
             )}
+            {item.itemStatus === "Delivered" &&
+              item.returnStatus === "None" && <Button>Request Return</Button>}
           </CardContent>
         </Card>
       ))}
+      {order.paymentStatus === "Refunded" && (
+        <Box
+          mt={3}
+          p={2}
+          sx={{
+            border: "1px solid #ddd",
+            borderRadius: 2,
+          }}
+        >
+          <Typography variant="h6" fontWeight={700}>
+            💰 Refund Details
+          </Typography>
+
+          <Typography>Amount : ₹{order.refundAmount}</Typography>
+
+          <Typography>Status :{order.paymentStatus}</Typography>
+
+          <Typography>
+            Date :{new Date(order.refundDate).toLocaleString()}
+          </Typography>
+        </Box>
+      )}
+      {order.orderStatus === "Delivered" && (
+        <Button variant="contained" onClick={repeatOrder}>
+          Repeat Order
+        </Button>
+      )}
+      {order.orderStatus === "Delivered" && (
+        <Button variant="contained" onClick={downloadInvoice}>
+          Download Invoice
+        </Button>
+      )}
     </Box>
   );
 };

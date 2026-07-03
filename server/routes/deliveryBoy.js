@@ -28,28 +28,22 @@ router.get("/orders", authMiddleware, async (req, res) => {
   }
 });
 
-router.get(
-  "/pending",
-  authMiddleware,
-  async (req, res) => {
-    try {
-      const deliveryBoys =
-        await DeliveryBoy.find({
-          status: true,
-          verificationStatus:
-            "Pending",
-        }).sort({
-          createdAt: -1,
-        });
+router.get("/pending", authMiddleware, async (req, res) => {
+  try {
+    const deliveryBoys = await DeliveryBoy.find({
+      status: true,
+      verificationStatus: "Pending",
+    }).sort({
+      createdAt: -1,
+    });
 
-      res.json(deliveryBoys);
-    } catch (err) {
-      res.status(500).json({
-        message: err.message,
-      });
-    }
+    res.json(deliveryBoys);
+  } catch (err) {
+    res.status(500).json({
+      message: err.message,
+    });
   }
-);
+});
 
 // GET ALL
 router.get("/", authMiddleware, async (req, res) => {
@@ -63,29 +57,24 @@ router.get("/", authMiddleware, async (req, res) => {
     res.json(deliveryBoys);
   } catch (err) {
     res.status(500).json({
-      message: err.message
+      message: err.message,
     });
   }
 });
 
-router.get(
-  "/profile",
-  authMiddleware,
-  async (req, res) => {
-    try {
-      const deliveryBoy =
-        await DeliveryBoy.findById(
-          req.user.id
-        ).select("-password");
+router.get("/profile", authMiddleware, async (req, res) => {
+  try {
+    const deliveryBoy = await DeliveryBoy.findById(req.user.id).select(
+      "-password",
+    );
 
-      res.json(deliveryBoy);
-    } catch (err) {
-      res.status(500).json({
-        message: err.message,
-      });
-    }
+    res.json(deliveryBoy);
+  } catch (err) {
+    res.status(500).json({
+      message: err.message,
+    });
   }
-);
+});
 
 // GET ONE
 router.get("/:id", authMiddleware, async (req, res) => {
@@ -121,78 +110,55 @@ router.post(
   ]),
   async (req, res) => {
     try {
-      const existingDeliveryBoy =
-        await DeliveryBoy.findOne({
-          $or: [
-            { email: req.body.email },
-            { mobile: req.body.mobile },
-            {
-              aadhaarNumber:
-                req.body.aadhaarNumber,
-            },
-            {
-              panNumber:
-                req.body.panNumber,
-            },
-            {
-              drivingLicenseNumber:
-                req.body.drivingLicenseNumber,
-            },
-            {
-              vehicleNumber:
-                req.body.vehicleNumber,
-            },
-          ],
-        });
+      const existingDeliveryBoy = await DeliveryBoy.findOne({
+        $or: [
+          { email: req.body.email },
+          { mobile: req.body.mobile },
+          {
+            aadhaarNumber: req.body.aadhaarNumber,
+          },
+          {
+            panNumber: req.body.panNumber,
+          },
+          {
+            drivingLicenseNumber: req.body.drivingLicenseNumber,
+          },
+          {
+            vehicleNumber: req.body.vehicleNumber,
+          },
+        ],
+      });
 
       if (existingDeliveryBoy) {
         return res.status(400).json({
-          message:
-            "Delivery boy already exists",
+          message: "Delivery boy already exists",
         });
       }
 
-      const hashedPassword =
-        await bcrypt.hash(
-          req.body.password,
-          10
-        );
+      const hashedPassword = await bcrypt.hash(req.body.password, 10);
 
-      const deliveryBoy =
-        await DeliveryBoy.create({
-          ...req.body,
+      const deliveryBoy = await DeliveryBoy.create({
+        ...req.body,
 
-          password: hashedPassword,
+        password: hashedPassword,
 
-          photo:
-            req.files?.photo?.[0]
-              ?.filename || "",
+        photo: req.files?.photo?.[0]?.filename || "",
 
-          aadhaarImage:
-            req.files
-              ?.aadhaarImage?.[0]
-              ?.filename || "",
+        aadhaarImage: req.files?.aadhaarImage?.[0]?.filename || "",
 
-          panImage:
-            req.files
-              ?.panImage?.[0]
-              ?.filename || "",
+        panImage: req.files?.panImage?.[0]?.filename || "",
 
-          drivingLicenseImage:
-            req.files
-              ?.drivingLicenseImage?.[0]
-              ?.filename || "",
-        });
+        drivingLicenseImage:
+          req.files?.drivingLicenseImage?.[0]?.filename || "",
+      });
 
-      res.status(201).json(
-        deliveryBoy
-      );
+      res.status(201).json(deliveryBoy);
     } catch (err) {
       res.status(500).json({
         message: err.message,
       });
     }
-  }
+  },
 );
 
 router.post("/login", async (req, res) => {
@@ -210,10 +176,7 @@ router.post("/login", async (req, res) => {
       });
     }
 
-    const isMatch = await bcrypt.compare(
-      password,
-      deliveryBoy.password
-    );
+    const isMatch = await bcrypt.compare(password, deliveryBoy.password);
 
     if (!isMatch) {
       return res.status(400).json({
@@ -223,8 +186,7 @@ router.post("/login", async (req, res) => {
 
     if (!deliveryBoy.isVerified) {
       return res.status(400).json({
-        message:
-          "Your account is not verified yet.",
+        message: "Your account is not verified yet.",
       });
     }
 
@@ -236,7 +198,7 @@ router.post("/login", async (req, res) => {
       process.env.JWT_ACCESS_SECRET,
       {
         expiresIn: "1d",
-      }
+      },
     );
 
     res.json({
@@ -250,165 +212,138 @@ router.post("/login", async (req, res) => {
   }
 });
 
-router.post(
-  "/change-password",
-  authMiddleware,
-  async (req, res) => {
-    try {
-      const {
-        oldPassword,
-        newPassword,
-      } = req.body;
+router.post("/change-password", authMiddleware, async (req, res) => {
+  try {
+    const { oldPassword, newPassword } = req.body;
 
-      const deliveryBoy =
-        await DeliveryBoy.findById(
-          req.user.id
-        );
+    const deliveryBoy = await DeliveryBoy.findById(req.user.id);
 
-      const isMatch =
-        await bcrypt.compare(
-          oldPassword,
-          deliveryBoy.password
-        );
+    const isMatch = await bcrypt.compare(oldPassword, deliveryBoy.password);
 
-      if (!isMatch) {
-        return res.status(400).json({
-          message:
-            "Old password is incorrect",
-        });
-      }
-
-      deliveryBoy.password =
-        await bcrypt.hash(
-          newPassword,
-          10
-        );
-
-      await deliveryBoy.save();
-
-      res.json({
-        message:
-          "Password changed successfully",
-      });
-    } catch (err) {
-      res.status(500).json({
-        message: err.message,
+    if (!isMatch) {
+      return res.status(400).json({
+        message: "Old password is incorrect",
       });
     }
+
+    deliveryBoy.password = await bcrypt.hash(newPassword, 10);
+
+    await deliveryBoy.save();
+
+    res.json({
+      message: "Password changed successfully",
+    });
+  } catch (err) {
+    res.status(500).json({
+      message: err.message,
+    });
   }
-);
+});
 
-router.post(
-  "/toggle-availability",
-  authMiddleware,
-  async (req, res) => {
-    try {
-      const deliveryBoy =
-        await DeliveryBoy.findById(
-          req.user.id
-        );
+router.post("/toggle-availability", authMiddleware, async (req, res) => {
+  try {
+    const deliveryBoy = await DeliveryBoy.findById(req.user.id);
 
-      deliveryBoy.isAvailable =
-        !deliveryBoy.isAvailable;
+    deliveryBoy.isAvailable = !deliveryBoy.isAvailable;
 
-      await deliveryBoy.save();
+    await deliveryBoy.save();
 
-      res.json({
-        message:
-          "Availability updated",
-        isAvailable:
-          deliveryBoy.isAvailable,
-      });
-    } catch (err) {
-      res.status(500).json({
-        message: err.message,
+    res.json({
+      message: "Availability updated",
+      isAvailable: deliveryBoy.isAvailable,
+    });
+  } catch (err) {
+    res.status(500).json({
+      message: err.message,
+    });
+  }
+});
+
+router.post("/location", authMiddleware, async (req, res) => {
+  try {
+    const { lat, lng } = req.body;
+
+    const deliveryBoy = await DeliveryBoy.findByIdAndUpdate(
+      req.user.id,
+      {
+        currentLocation: {
+          lat,
+          lng,
+          updatedAt: new Date(),
+        },
+      },
+      {
+        new: true,
+      },
+    );
+
+    res.json(deliveryBoy);
+  } catch (err) {
+    res.status(500).json({
+      message: err.message,
+    });
+  }
+});
+
+router.post("/:id/approve", authMiddleware, async (req, res) => {
+  try {
+    const deliveryBoy = await DeliveryBoy.findById(req.params.id);
+
+    if (!deliveryBoy) {
+      return res.status(404).json({
+        message: "Delivery Boy not found",
       });
     }
+
+    deliveryBoy.isVerified = true;
+
+    deliveryBoy.verificationStatus = "Approved";
+
+    deliveryBoy.rejectionReason = "";
+
+    await deliveryBoy.save();
+
+    res.json({
+      message: "Delivery Boy verified successfully",
+      deliveryBoy,
+    });
+  } catch (err) {
+    res.status(500).json({
+      message: err.message,
+    });
   }
-);
+});
 
-router.post(
-  "/:id/approve",
-  authMiddleware,
-  async (req, res) => {
-    try {
-      const deliveryBoy =
-        await DeliveryBoy.findById(
-          req.params.id
-        );
+router.post("/:id/reject", authMiddleware, async (req, res) => {
+  try {
+    const { rejectionReason } = req.body;
 
-      if (!deliveryBoy) {
-        return res.status(404).json({
-          message:
-            "Delivery Boy not found",
-        });
-      }
+    const deliveryBoy = await DeliveryBoy.findById(req.params.id);
 
-      deliveryBoy.isVerified = true;
-
-      deliveryBoy.verificationStatus =
-        "Approved";
-
-      deliveryBoy.rejectionReason = "";
-
-      await deliveryBoy.save();
-
-      res.json({
-        message:
-          "Delivery Boy verified successfully",
-        deliveryBoy,
-      });
-    } catch (err) {
-      res.status(500).json({
-        message: err.message,
+    if (!deliveryBoy) {
+      return res.status(404).json({
+        message: "Delivery Boy not found",
       });
     }
+
+    deliveryBoy.isVerified = false;
+
+    deliveryBoy.verificationStatus = "Rejected";
+
+    deliveryBoy.rejectionReason = rejectionReason;
+
+    await deliveryBoy.save();
+
+    res.json({
+      message: "Delivery Boy rejected",
+      deliveryBoy,
+    });
+  } catch (err) {
+    res.status(500).json({
+      message: err.message,
+    });
   }
-);
-
-router.post(
-  "/:id/reject",
-  authMiddleware,
-  async (req, res) => {
-    try {
-      const {
-        rejectionReason,
-      } = req.body;
-
-      const deliveryBoy =
-        await DeliveryBoy.findById(
-          req.params.id
-        );
-
-      if (!deliveryBoy) {
-        return res.status(404).json({
-          message:
-            "Delivery Boy not found",
-        });
-      }
-
-      deliveryBoy.isVerified = false;
-
-      deliveryBoy.verificationStatus =
-        "Rejected";
-
-      deliveryBoy.rejectionReason =
-        rejectionReason;
-
-      await deliveryBoy.save();
-
-      res.json({
-        message:
-          "Delivery Boy rejected",
-        deliveryBoy,
-      });
-    } catch (err) {
-      res.status(500).json({
-        message: err.message,
-      });
-    }
-  }
-);
+});
 
 // UPDATE
 router.put(
@@ -426,21 +361,17 @@ router.put(
         ...req.body,
       };
 
-      if (
-        req.files?.photo?.[0]
-      ) {
-        updateData.photo =
-          req.files.photo[0].filename;
+      if (req.files?.photo?.[0]) {
+        updateData.photo = req.files.photo[0].filename;
       }
 
-      const deliveryBoy =
-        await DeliveryBoy.findByIdAndUpdate(
-          req.user.id,
-          updateData,
-          {
-            new: true,
-          }
-        );
+      const deliveryBoy = await DeliveryBoy.findByIdAndUpdate(
+        req.user.id,
+        updateData,
+        {
+          new: true,
+        },
+      );
 
       res.json(deliveryBoy);
     } catch (err) {
@@ -448,7 +379,7 @@ router.put(
         message: err.message,
       });
     }
-  }
+  },
 );
 
 router.put(
@@ -470,62 +401,37 @@ router.put(
       };
 
       if (req.body.password) {
-        updateData.password =
-          await bcrypt.hash(
-            req.body.password,
-            10
-          );
+        updateData.password = await bcrypt.hash(req.body.password, 10);
       }
 
-      if (
-        req.files?.photo?.[0]
-      ) {
-        updateData.photo =
-          req.files.photo[0].filename;
+      if (req.files?.photo?.[0]) {
+        updateData.photo = req.files.photo[0].filename;
       }
 
-      if (
-        req.files
-          ?.aadhaarImage?.[0]
-      ) {
-        updateData.aadhaarImage =
-          req.files
-            .aadhaarImage[0]
-            .filename;
+      if (req.files?.aadhaarImage?.[0]) {
+        updateData.aadhaarImage = req.files.aadhaarImage[0].filename;
       }
 
-      if (
-        req.files
-          ?.panImage?.[0]
-      ) {
-        updateData.panImage =
-          req.files.panImage[0]
-            .filename;
+      if (req.files?.panImage?.[0]) {
+        updateData.panImage = req.files.panImage[0].filename;
       }
 
-      if (
-        req.files
-          ?.drivingLicenseImage?.[0]
-      ) {
+      if (req.files?.drivingLicenseImage?.[0]) {
         updateData.drivingLicenseImage =
-          req.files
-            .drivingLicenseImage[0]
-            .filename;
+          req.files.drivingLicenseImage[0].filename;
       }
 
-      const deliveryBoy =
-        await DeliveryBoy.findByIdAndUpdate(
-          req.params.id,
-          updateData,
-          {
-            new: true,
-          }
-        );
+      const deliveryBoy = await DeliveryBoy.findByIdAndUpdate(
+        req.params.id,
+        updateData,
+        {
+          new: true,
+        },
+      );
 
       if (!deliveryBoy) {
         return res.status(404).json({
-          message:
-            "Delivery boy not found",
+          message: "Delivery boy not found",
         });
       }
 
@@ -535,32 +441,24 @@ router.put(
         message: err.message,
       });
     }
-  }
+  },
 );
 
 // DELETE
-router.delete(
-  "/:id",
-  authMiddleware,
-  async (req, res) => {
-    try {
-      await DeliveryBoy.findByIdAndUpdate(
-        req.params.id,
-        {
-          status: false,
-        }
-      );
+router.delete("/:id", authMiddleware, async (req, res) => {
+  try {
+    await DeliveryBoy.findByIdAndUpdate(req.params.id, {
+      status: false,
+    });
 
-      res.json({
-        message:
-          "Delivery boy deleted successfully",
-      });
-    } catch (err) {
-      res.status(500).json({
-        message: err.message,
-      });
-    }
+    res.json({
+      message: "Delivery boy deleted successfully",
+    });
+  } catch (err) {
+    res.status(500).json({
+      message: err.message,
+    });
   }
-);
+});
 
 export default router;

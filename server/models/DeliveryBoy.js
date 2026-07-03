@@ -130,6 +130,22 @@ const deliveryBoySchema = new mongoose.Schema(
       type: String,
       default: "",
     },
+
+    currentLocation: {
+      lat: {
+        type: Number,
+        default: null,
+      },
+
+      lng: {
+        type: Number,
+        default: null,
+      },
+
+      updatedAt: {
+        type: Date,
+      },
+    },
   },
   {
     timestamps: true,

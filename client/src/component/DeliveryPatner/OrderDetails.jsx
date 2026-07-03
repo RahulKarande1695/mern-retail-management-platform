@@ -20,11 +20,12 @@ import api from "../../api/axios";
 const DeliveryOrderDetails = () => {
   const { id } = useParams();
   const [order, setOrder] = useState(null);
+  const [watchId, setWatchId] = useState(null);
   const lastTrackingStatus =
-  order?.trackingHistory?.length > 0
-    ? order.trackingHistory[order.trackingHistory.length - 1].status
-    : "";
-    
+    order?.trackingHistory?.length > 0
+      ? order.trackingHistory[order.trackingHistory.length - 1].status
+      : "";
+
   useEffect(() => {
     getOrder();
   }, []);
@@ -42,9 +43,8 @@ const DeliveryOrderDetails = () => {
   const handleAccept = async () => {
     try {
       await api.post(`/orders/${order._id}/accept-delivery`);
-
+      startLocationTracking();
       alert("Delivery Accepted");
-
       getOrder();
     } catch (err) {
       console.log(err);
@@ -54,9 +54,7 @@ const DeliveryOrderDetails = () => {
   const handlePicked = async () => {
     try {
       await api.post(`/orders/${order._id}/picked`);
-
       alert("Order Picked");
-
       getOrder();
     } catch (err) {
       console.log(err);
@@ -66,13 +64,60 @@ const DeliveryOrderDetails = () => {
   const handleDelivered = async () => {
     try {
       await api.post(`/orders/${order._id}/delivered`);
-
+      if (watchId) {
+        navigator.geolocation.clearWatch(watchId);
+        setWatchId(null);
+      }
       alert("Order Delivered");
-
       getOrder();
     } catch (err) {
       console.log(err);
     }
+  };
+
+  const startLocationTracking = () => {
+    if (!navigator.geolocation) {
+      alert("Location not supported");
+      return;
+    }
+
+    const id = navigator.geolocation.watchPosition(
+      async (position) => {
+        const lat = position.coords.latitude;
+
+        const lng = position.coords.longitude;
+
+        await api.post("/deliveryBoy/location", {
+          lat,
+          lng,
+        });
+
+        console.log("Location Updated", lat, lng);
+      },
+
+      (error) => {
+        console.log(error);
+      },
+
+      {
+        enableHighAccuracy: true,
+      },
+    );
+
+    setWatchId(id);
+  };
+
+  const openGoogleMap = () => {
+    const lat = order.deliveryAddress?.location?.lat;
+
+    const lng = order.deliveryAddress?.location?.lng;
+
+    if (!lat || !lng) {
+      alert("Location not available");
+      return;
+    }
+
+    window.open(`https://www.google.com/maps?q=${lat},${lng}`, "_blank");
   };
 
   if (!order) return <h2>Loading...</h2>;
@@ -129,7 +174,12 @@ const DeliveryOrderDetails = () => {
 
               <Typography>{order.deliveryAddress?.pincode}</Typography>
 
-              <Button sx={{ mt: 2 }} startIcon={<Room />} variant="outlined">
+              <Button
+                sx={{ mt: 2 }}
+                startIcon={<Room />}
+                variant="outlined"
+                onClick={openGoogleMap}
+              >
                 Open Google Maps
               </Button>
             </CardContent>

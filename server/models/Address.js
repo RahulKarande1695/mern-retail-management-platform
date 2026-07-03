@@ -80,14 +80,16 @@ const addressSchema = new mongoose.Schema(
       trim: true,
     },
 
-    latitude: {
-      type: Number,
-      default: null,
-    },
+    location: {
+      lat: {
+        type: Number,
+        default: null,
+      },
 
-    longitude: {
-      type: Number,
-      default: null,
+      lng: {
+        type: Number,
+        default: null,
+      },
     },
 
     addressType: {
@@ -114,7 +116,7 @@ const addressSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 export default mongoose.model("Address", addressSchema);

@@ -1,4 +1,5 @@
 import express from "express";
+import PDFDocument from "pdfkit";
 import Order from "../models/Order.js";
 import authMiddleware from "../middleware/authMiddleware.js";
 import DeliveryBoy from "../models/DeliveryBoy.js";
@@ -279,6 +280,68 @@ router.post(
   },
 );
 
+router.post(
+  "/:orderId/items/:itemId/return",
+  authMiddleware,
+  async (req, res) => {
+    try {
+      const { reason } = req.body;
+      const order = await Order.findById(req.params.orderId);
+
+      if (!order) {
+        return res.status(404).json({
+          message: "Order not found",
+        });
+      }
+
+      if (order.customer.toString() !== req.user.id) {
+        return res.status(403).json({
+          message: "Unauthorized",
+        });
+      }
+
+      const item = order.items.id(req.params.itemId);
+
+      if (!item) {
+        return res.status(404).json({
+          message: "Item not found",
+        });
+      }
+
+      if (item.itemStatus !== "Delivered") {
+        return res.status(400).json({
+          message: "Only delivered items can return",
+        });
+      }
+
+      if (item.returnStatus !== "None") {
+        return res.status(400).json({
+          message: "Return already requested",
+        });
+      }
+
+      item.returnStatus = "Requested";
+
+      order.returnReason = reason;
+
+      item.trackingHistory.push({
+        status: "Return Requested",
+      });
+
+      await order.save();
+
+      res.json({
+        message: "Return Requested Successfully",
+        order,
+      });
+    } catch (err) {
+      res.status(500).json({
+        message: err.message,
+      });
+    }
+  },
+);
+
 router.post("/:orderId/assignDeliveryBoy", authMiddleware, async (req, res) => {
   try {
     const { deliveryBoyId } = req.body;
@@ -508,6 +571,194 @@ router.post("/:orderId/delivered", authMiddleware, async (req, res) => {
   }
 });
 
+// GET ALL RETURN REQUESTS
+router.get("/returns", authMiddleware, async (req, res) => {
+  try {
+    const orders = await Order.find({
+      "items.returnStatus": "Requested",
+      status: true,
+    })
+      .populate("customer", "name email mobile")
+      .populate("deliveryAddress")
+      .populate("items.product")
+      .sort({ createdAt: -1 });
+
+    res.json(orders);
+  } catch (err) {
+    res.status(500).json({
+      message: err.message,
+    });
+  }
+});
+
+router.get("/returns/approved", authMiddleware, async (req, res) => {
+  try {
+    const orders = await Order.find({
+      "items.returnStatus": "Approved",
+      status: true,
+    })
+      .populate("customer", "name email")
+      .populate("items.product")
+      .sort({
+        createdAt: -1,
+      });
+
+    res.json(orders);
+  } catch (err) {
+    res.status(500).json({
+      message: err.message,
+    });
+  }
+});
+
+router.post(
+  "/:orderId/items/:itemId/return/approve",
+  authMiddleware,
+  async (req, res) => {
+    try {
+      const order = await Order.findById(req.params.orderId);
+
+      if (!order) {
+        return res.status(404).json({
+          message: "Order not found",
+        });
+      }
+
+      const item = order.items.id(req.params.itemId);
+
+      if (!item) {
+        return res.status(404).json({
+          message: "Item not found",
+        });
+      }
+
+      if (item.returnStatus !== "Requested") {
+        return res.status(400).json({
+          message: "Return not requested",
+        });
+      }
+
+      item.returnStatus = "Approved";
+
+      order.refundAmount += item.price * item.quantity;
+
+      order.paymentStatus = "RefundInitiated";
+
+      item.trackingHistory.push({
+        status: "Return Approved",
+      });
+
+      await order.save();
+
+      res.json({
+        message: "Return Approved",
+        order,
+      });
+    } catch (err) {
+      res.status(500).json({
+        message: err.message,
+      });
+    }
+  },
+);
+
+router.post(
+  "/:orderId/items/:itemId/return/reject",
+  authMiddleware,
+  async (req, res) => {
+    try {
+      const { reason } = req.body;
+
+      const order = await Order.findById(req.params.orderId);
+
+      const item = order.items.id(req.params.itemId);
+
+      item.returnStatus = "Rejected";
+
+      order.rejectionReason = reason;
+
+      item.trackingHistory.push({
+        status: "Return Rejected",
+      });
+
+      await order.save();
+
+      res.json({
+        message: "Return Rejected",
+        order,
+      });
+    } catch (err) {
+      res.status(500).json({
+        message: err.message,
+      });
+    }
+  },
+);
+
+// PROCESS REFUND
+router.post(
+  "/:orderId/items/:itemId/refund",
+  authMiddleware,
+  async (req, res) => {
+    try {
+      const order = await Order.findById(req.params.orderId);
+
+      if (!order) {
+        return res.status(404).json({
+          message: "Order not found",
+        });
+      }
+
+      const item = order.items.id(req.params.itemId);
+
+      if (!item) {
+        return res.status(404).json({
+          message: "Item not found",
+        });
+      }
+
+      // only approved return refund allowed
+      if (item.returnStatus !== "Approved") {
+        return res.status(400).json({
+          message: "Return is not approved",
+        });
+      }
+
+      const refundAmount = item.price * item.quantity;
+
+      order.refundAmount += refundAmount;
+
+      order.paymentStatus = "Refunded";
+
+      order.refundDate = new Date();
+
+      item.returnStatus = "Returned";
+
+      item.trackingHistory.push({
+        status: "Refund Completed",
+      });
+
+      order.trackingHistory.push({
+        status: "Refund Completed",
+      });
+
+      await order.save();
+
+      res.json({
+        message: "Refund processed successfully",
+
+        refundAmount,
+
+        order,
+      });
+    } catch (err) {
+      res.status(500).json({
+        message: err.message,
+      });
+    }
+  },
+);
+
 router.get("/:id", authMiddleware, async (req, res) => {
   try {
     const order = await Order.findOne({
@@ -527,6 +778,153 @@ router.get("/:id", authMiddleware, async (req, res) => {
       });
     }
     res.json(order);
+  } catch (err) {
+    res.status(500).json({
+      message: err.message,
+    });
+  }
+});
+
+// DOWNLOAD INVOICE
+
+router.get("/:id/invoice", authMiddleware, async (req, res) => {
+  try {
+    const order = await Order.findById(req.params.id)
+      .populate("customer", "name email")
+      .populate("items.product");
+
+    if (!order) {
+      return res.status(404).json({
+        message: "Order not found",
+      });
+    }
+
+    const doc = new PDFDocument();
+
+    res.setHeader("Content-Type", "application/pdf");
+
+    res.setHeader(
+      "Content-Disposition",
+      `attachment; filename=${order.orderNumber}.pdf`,
+    );
+
+    doc.pipe(res);
+
+    // TITLE
+    doc.fontSize(22).text("DG Flake Grocery Invoice", {
+      align: "center",
+    });
+
+    doc.moveDown();
+
+    // ORDER INFO
+
+    doc.fontSize(12);
+
+    doc.text(`Invoice No : ${order.orderNumber}`);
+
+    doc.text(`Date : ${order.createdAt.toDateString()}`);
+
+    doc.text(`Customer : ${order.customer.name}`);
+
+    doc.text(`Email : ${order.customer.email}`);
+
+    doc.moveDown();
+
+    // ITEMS
+
+    doc.fontSize(16).text("Items");
+
+    doc.moveDown();
+
+    order.items.forEach((item, index) => {
+      doc.fontSize(12).text(
+        `${index + 1}. ${item.productName}
+Qty: ${item.quantity}
+Price: ₹${item.price}
+Total: ₹${item.price * item.quantity}`,
+      );
+
+      doc.moveDown();
+    });
+
+    doc.moveDown();
+
+    doc.fontSize(16).text(`Total Amount : ₹${order.totalAmount}`);
+
+    doc.text(`Payment : ${order.paymentStatus}`);
+
+    doc.moveDown();
+
+    doc.text("Thank you for shopping!");
+
+    doc.end();
+  } catch (err) {
+    res.status(500).json({
+      message: err.message,
+    });
+  }
+});
+
+// REPEAT ORDER
+router.post("/:id/repeat", authMiddleware, async (req, res) => {
+  try {
+    const order = await Order.findById(req.params.id);
+
+    if (!order) {
+      return res.status(404).json({
+        message: "Order not found",
+      });
+    }
+
+    // Customer ownership check
+    if (order.customer.toString() !== req.user.id) {
+      return res.status(403).json({
+        message: "Unauthorized",
+      });
+    }
+
+    let cart = await Cart.findOne({
+      customer: req.user.id,
+    });
+
+    if (!cart) {
+      cart = await Cart.create({
+        customer: req.user.id,
+        items: [],
+      });
+    }
+
+    for (const orderItem of order.items) {
+      const product = await Product.findById(orderItem.product);
+
+      // Skip deleted/out of stock products
+      if (!product || !product.status || product.stock <= 0) {
+        continue;
+      }
+
+      const existingItem = cart.items.find(
+        (item) => item.product.toString() === product._id.toString(),
+      );
+
+      if (existingItem) {
+        existingItem.quantity = Math.min(
+          existingItem.quantity + orderItem.quantity,
+          product.stock,
+        );
+      } else {
+        cart.items.push({
+          product: product._id,
+          quantity: Math.min(orderItem.quantity, product.stock),
+        });
+      }
+    }
+
+    await cart.save();
+
+    res.json({
+      message: "Products added to cart",
+    });
   } catch (err) {
     res.status(500).json({
       message: err.message,

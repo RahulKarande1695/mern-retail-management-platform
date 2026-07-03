@@ -13,6 +13,7 @@ import cartRoutes from "./routes/cart.js";
 import addressRoutes from "./routes/address.js"
 import checkoutRoutes from "./routes/checkout.js"
 import deliveryBoyRoutes from "./routes/deliveryBoy.js";
+import analyticsRoutes from "./routes/analytics.js"
 import path from "path";
 
 dotenv.config();
@@ -53,8 +54,11 @@ app.use(
   "/deliveryBoy",
   deliveryBoyRoutes
 );
-
 app.use("/checkout", checkoutRoutes);
+app.use(
+ "/analytics",
+ analyticsRoutes
+);
 
 mongoose
   .connect(process.env.MONGO_URI)

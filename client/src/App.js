@@ -35,6 +35,10 @@ import Checkout from "./component/Payment/Checkout";
 import AddressForm from "./component/Payment/AddressForm";
 import CustomerOrderDetails from "./component/CustomerOrders/CustomerOrderDetails";
 import OrderSuccess from "./component/Payment/OrderSuccess";
+import ReturnRequests from "./component/OrdersList/ReturnRequests/ReturnRequests";
+import ApprovedReturns from "./component/OrdersList/ReturnRequests/ApprovedReturns";
+import ShopDashboard from "./component/ShopDashboard/Dashboard/Dashboard";
+
 
 function App() {
   return (
@@ -47,6 +51,7 @@ function App() {
       </Route>
       <Route path="dgflake" element={<LayoutDGFlake />}>
         <Route index element={<HomeMenu />} />
+        <Route path="dashboard" element={<ShopDashboard />} />
         <Route
           path="categories"
           element={
@@ -168,6 +173,8 @@ function App() {
             </RoleProtectedRoute>
           }
         />
+        <Route path="returns" element={<ReturnRequests />} />
+        <Route path="returns/approved" element={<ApprovedReturns />} />
       </Route>
       // Customer
       <Route path="customer" element={<LayoutDGFlake />}>

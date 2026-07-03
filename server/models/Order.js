@@ -79,6 +79,12 @@ const orderItemSchema = new mongoose.Schema({
     enum: ["None", "Requested", "Approved", "Rejected", "Returned"],
     default: "None",
   },
+
+  deliveryAddress: {
+  type: mongoose.Schema.Types.ObjectId,
+  ref: "Address",
+  required: true,
+},
 });
 
 const trackingSchema = new mongoose.Schema(
