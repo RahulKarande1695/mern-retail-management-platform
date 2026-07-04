@@ -14,6 +14,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
 import api from "../../api/axios";
+import PageContainer from "../common/PageContainer";
 
 const DeliveryBoyDetails = () => {
   const { id } = useParams();
@@ -71,15 +72,7 @@ const DeliveryBoyDetails = () => {
   };
 
   return (
-    <Box
-      sx={{
-        p: 3,
-        m: 2,
-        background: "#fff",
-        borderRadius: 2,
-        boxShadow: 2,
-      }}
-    >
+    <PageContainer>
       <Box
         display="flex"
         justifyContent="space-between"
@@ -108,8 +101,15 @@ const DeliveryBoyDetails = () => {
                   : ""
               }
               sx={{
-                width: 130,
-                height: 130,
+                width: {
+                  xs: 90,
+                  md: 130,
+                },
+
+                height: {
+                  xs: 90,
+                  md: 130,
+                },
               }}
             />
           </Grid>
@@ -249,7 +249,16 @@ const DeliveryBoyDetails = () => {
           </Grid>
         </Grid>
       </Paper>
-      <Box display="flex" justifyContent="end" alignItems="center" mt={3}>
+      <Box
+        display="flex"
+        justifyContent={{
+          xs: "center",
+          md: "flex-end",
+        }}
+        gap={2}
+        flexWrap="wrap"
+      >
+        {" "}
         {deliveryBoy.verificationStatus === "Pending" && (
           <>
             <Button color="success" variant="contained" onClick={handleApprove}>
@@ -267,7 +276,7 @@ const DeliveryBoyDetails = () => {
           </>
         )}
       </Box>
-    </Box>
+    </PageContainer>
   );
 };
 

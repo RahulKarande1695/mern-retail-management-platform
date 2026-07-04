@@ -1,127 +1,148 @@
-import React, { useEffect, useState } from "react";
+import {
+  Box,
+  TextField,
+  MenuItem,
+  Chip,
+  Button,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
+  TablePagination,
+} from "@mui/material";
 
-import { Box, MenuItem, TextField, Chip, Button } from "@mui/material";
+import { useEffect, useState } from "react";
 
-import Table from "@mui/material/Table";
-import TableBody from "@mui/material/TableBody";
-import TableCell from "@mui/material/TableCell";
-import TableContainer from "@mui/material/TableContainer";
-import TableHead from "@mui/material/TableHead";
-import TableRow from "@mui/material/TableRow";
-import Paper from "@mui/material/Paper";
+import { useNavigate } from "react-router-dom";
 
 import api from "../../api/axios";
-import { useNavigate } from "react-router-dom";
+
+import PageContainer from "../common/PageContainer";
+import TableWrapper from "../common/TableWrapper";
+import Loader from "../common/Loader";
+import usePagination from "../../hooks/usePagination";
 
 const OrdersList = () => {
   const navigate = useNavigate();
+
   const [orders, setOrders] = useState([]);
-  const [statusFilter, setStatusFilter] = useState("All");
+
+  const [status, setStatus] = useState("");
+
+  const [loading, setLoading] = useState(true);
+
+  const { page, rowsPerPage, setPage, handleRows, paginate } = usePagination();
 
   useEffect(() => {
     getOrders();
-  }, []);
+  }, [status]);
 
   const getOrders = async () => {
     try {
-      const res = await api.get("/orders");
+      setLoading(true);
+
+      const res = await api.get(`/orders?status=${status}`);
+
       setOrders(res.data);
     } catch (err) {
       console.log(err);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const filteredOrders =
-    statusFilter === "All"
-      ? orders
-      : orders.filter((item) => item.orderStatus === statusFilter);
+  if (loading) return <Loader />;
 
   return (
-    <Box
-      sx={{
-        background: "#FFFFFF",
-        boxShadow: "0px 1px 4px 0px #000000",
-        padding: "10px",
-        margin: "10px",
-        minHeight: "85vh",
-      }}
-    >
-      <Box
-        display="flex"
-        justifyContent="space-between"
-        alignItems="center"
-        mb={3}
-      >
+    <PageContainer>
+      <Box display="flex" justifyContent="space-between" mb={3}>
         <h2>Orders</h2>
 
         <TextField
           select
           size="small"
           label="Status"
-          value={statusFilter || "All"}
-          onChange={(e) => setStatusFilter(e.target.value)}
+          value={status}
           sx={{
-            width: "220px",
+            width: 200,
           }}
+          onChange={(e) => setStatus(e.target.value)}
         >
-          <MenuItem value="All">All</MenuItem>
+          <MenuItem value="">All</MenuItem>
+
           <MenuItem value="Placed">New Orders</MenuItem>
+
           <MenuItem value="Processing">Processing</MenuItem>
+
           <MenuItem value="Delivered">Delivered</MenuItem>
+
           <MenuItem value="Cancelled">Cancelled</MenuItem>
         </TextField>
       </Box>
 
-      <TableContainer component={Paper}>
+      <TableWrapper>
         <Table>
-          <TableHead sx={{ background: "#FFF8B7" }}>
+          <TableHead
+            sx={{
+              background: "#FFF8B7",
+            }}
+          >
             <TableRow>
-              <TableCell>Sr No</TableCell>
+              <TableCell>Sr</TableCell>
+
               <TableCell>Order No</TableCell>
+
               <TableCell>Customer</TableCell>
+
               <TableCell>Items</TableCell>
-              <TableCell>Amount</TableCell>
+
+              <TableCell>Total</TableCell>
+
               <TableCell>Payment</TableCell>
+
               <TableCell>Status</TableCell>
-              <TableCell>Delivery Status</TableCell>
+
+              <TableCell>Delivery</TableCell>
+
               <TableCell>Action</TableCell>
             </TableRow>
           </TableHead>
-          <TableBody>
-            {filteredOrders.length === 0 && (
-              <TableRow>
-                <TableCell colSpan={8} align="center">
-                  No Orders Found
-                </TableCell>
-              </TableRow>
-            )}
 
-            {filteredOrders.map((order, index) => {
-              const deliveryStatus =
-                order.trackingHistory.length > 0
-                  ? order.trackingHistory[order.trackingHistory.length - 1]
-                      .status
-                  : "-";
+          <TableBody>
+            {paginate(orders).map((order, index) => {
+              const deliveryStatus = order.trackingHistory?.length
+                ? order.trackingHistory[order.trackingHistory.length - 1].status
+                : "-";
+
               return (
                 <TableRow key={order._id}>
-                  <TableCell>{index + 1}</TableCell>
+                  <TableCell>{page * rowsPerPage + index + 1}</TableCell>
+
                   <TableCell>{order.orderNumber}</TableCell>
+
                   <TableCell>{order.customer?.name}</TableCell>
+
                   <TableCell>{order.items?.length}</TableCell>
+
                   <TableCell>₹{order.totalAmount}</TableCell>
+
                   <TableCell>
                     <Chip size="small" label={order.paymentStatus} />
                   </TableCell>
+
                   <TableCell>
                     <Chip size="small" label={order.orderStatus} />
                   </TableCell>
+
                   <TableCell>
-                    <Chip size="small" label={deliveryStatus} color="info" />
+                    <Chip size="small" color="info" label={deliveryStatus} />
                   </TableCell>
+
                   <TableCell>
                     <Button
-                      size="small"
                       variant="contained"
+                      size="small"
                       onClick={() => navigate(`/dgflake/orders/${order._id}`)}
                     >
                       View
@@ -132,8 +153,17 @@ const OrdersList = () => {
             })}
           </TableBody>
         </Table>
-      </TableContainer>
-    </Box>
+      </TableWrapper>
+
+      <TablePagination
+        component="div"
+        count={orders.length}
+        page={page}
+        rowsPerPage={rowsPerPage}
+        onPageChange={(e, p) => setPage(p)}
+        onRowsPerPageChange={handleRows}
+      />
+    </PageContainer>
   );
 };
 

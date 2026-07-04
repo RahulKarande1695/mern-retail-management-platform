@@ -6,12 +6,21 @@ import {
   CardMedia,
   Chip,
   Divider,
+  Stack,
   Typography,
 } from "@mui/material";
+import LocalShippingIcon from "@mui/icons-material/LocalShipping";
+import PaidIcon from "@mui/icons-material/Paid";
 
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import api from "../../api/axios";
+
+const cardSx = {
+  borderRadius: "16px",
+  border: "1px solid #eaeaea",
+  boxShadow: "0 2px 12px rgba(0,0,0,0.05)",
+};
 
 const CustomerOrderDetails = () => {
   const { id } = useParams();
@@ -67,183 +76,269 @@ const CustomerOrderDetails = () => {
   };
 
   if (!order) {
-    return <h3>Loading...</h3>;
+    return (
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          minHeight: "60vh",
+        }}
+      >
+        <Typography variant="h6" color="text.secondary">
+          Loading...
+        </Typography>
+      </Box>
+    );
   }
 
   return (
-    <Box p={3}>
-      <Typography variant="h4" fontWeight={700} mb={3}>
+    <Box sx={{ p: { xs: 2, sm: 3 }, maxWidth: 1000, mx: "auto" }}>
+      <Typography
+        variant="h4"
+        fontWeight={700}
+        mb={{ xs: 2, sm: 3 }}
+        sx={{ fontSize: { xs: "1.4rem", sm: "2rem" } }}
+      >
         Track Order
       </Typography>
 
-      <Card sx={{ mb: 3 }}>
-        <CardContent>
-          <Typography>
-            <b>Order Number :</b> {order.orderNumber}
-          </Typography>
+      <Card sx={{ ...cardSx, mb: { xs: 2, sm: 3 } }}>
+        <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
+          <Box
+            sx={{
+              display: "grid",
+              gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" },
+              gap: 1.5,
+            }}
+          >
+            <Typography>
+              <b>Order Number :</b> {order.orderNumber}
+            </Typography>
 
-          <Typography>
-            <b>Payment :</b> {order.paymentMethod}
-          </Typography>
+            <Typography>
+              <b>Payment :</b> {order.paymentMethod}
+            </Typography>
 
-          <Typography>
-            <b>Payment Status :</b> {order.paymentStatus}
-          </Typography>
+            <Typography>
+              <b>Payment Status :</b> {order.paymentStatus}
+            </Typography>
 
-          <Typography>
-            <b>Total :</b> ₹{order.totalAmount}
-          </Typography>
+            <Typography>
+              <b>Total :</b> ₹{order.totalAmount}
+            </Typography>
+          </Box>
 
-          <Typography mt={2}>
-            <b>Order Status</b>
-          </Typography>
-
-          <Chip color="primary" label={order.orderStatus} />
+          <Stack direction="row" alignItems="center" spacing={1.5} mt={2.5}>
+            <Typography fontWeight={600}>Order Status :</Typography>
+            <Chip color="primary" label={order.orderStatus} sx={{ fontWeight: 600 }} />
+          </Stack>
         </CardContent>
       </Card>
 
-      <Typography variant="h5" mb={2}>
+      {order.deliveryBoy && (
+        <Card sx={{ ...cardSx, mb: { xs: 2, sm: 3 }, bgcolor: "#fafafa" }}>
+          <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
+            <Stack direction="row" alignItems="center" spacing={1} mb={2}>
+              <LocalShippingIcon color="primary" />
+              <Typography variant="h6" fontWeight={700}>
+                Delivery Partner
+              </Typography>
+            </Stack>
+
+            <Stack spacing={0.6} mb={2}>
+              <Typography>
+                <strong>Name :</strong> {order.deliveryBoy.name}
+              </Typography>
+
+              <Typography>
+                <strong>Mobile :</strong> {order.deliveryBoy.mobile}
+              </Typography>
+
+              <Typography>
+                <strong>Vehicle :</strong> {order.deliveryBoy.vehicleType}
+              </Typography>
+            </Stack>
+
+            <Button
+              variant="contained"
+              color="success"
+              href={`tel:${order.deliveryBoy.mobile}`}
+              sx={{ borderRadius: "10px", textTransform: "none" }}
+            >
+              Call Delivery Partner
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+
+      <Typography variant="h5" fontWeight={700} mb={2} sx={{ fontSize: { xs: "1.1rem", sm: "1.5rem" } }}>
         Products
       </Typography>
 
-      {order.deliveryBoy && (
-        <Box
-          mt={3}
-          p={2}
-          sx={{
-            border: "1px solid #ddd",
-            borderRadius: 2,
-            bgcolor: "#fafafa",
-          }}
-        >
-          <h3>🚚 Delivery Partner</h3>
-
-          <p>
-            <strong>Name :</strong> {order.deliveryBoy.name}
-          </p>
-
-          <p>
-            <strong>Mobile :</strong> {order.deliveryBoy.mobile}
-          </p>
-
-          <p>
-            <strong>Vehicle :</strong> {order.deliveryBoy.vehicleType}
-          </p>
-
-          <Button
-            variant="contained"
-            color="success"
-            href={`tel:${order.deliveryBoy.mobile}`}
-          >
-            Call Delivery Partner
-          </Button>
-        </Box>
-      )}
-      {order.items.map((item) => (
-        <Card key={item._id} sx={{ mb: 2 }}>
-          <CardContent>
-            <Box display="flex" gap={3}>
-              <CardMedia
-                component="img"
-                image={`http://localhost:5000/uploads/${item.product.image}`}
+      <Stack spacing={2} mb={3}>
+        {order.items.map((item) => (
+          <Card key={item._id} sx={cardSx}>
+            <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
+              <Box
                 sx={{
-                  width: 120,
-                  height: 120,
+                  display: "flex",
+                  flexDirection: { xs: "column", sm: "row" },
+                  gap: { xs: 2, sm: 3 },
                 }}
-              />
-
-              <Box flex={1}>
-                <Typography variant="h6">{item.productName}</Typography>
-                <Typography>Qty : {item.quantity}</Typography>
-                <Typography>Accepted : {item.acceptedQty}</Typography>
-                <Typography>Cancelled : {item.cancelledQty}</Typography>
-                <Typography color="primary" fontWeight={700}>
-                  ₹{item.price}
-                </Typography>
-
-                <Chip sx={{ mt: 2 }} label={item.itemStatus} />
-                {/* Return Status */}
-                {item.returnStatus !== "None" && (
-                  <Box mt={2}>
-                    <Typography fontWeight={600}>Return Status</Typography>
-                    <Chip
-                      label={item.returnStatus}
-                      color={
-                        item.returnStatus === "Returned"
-                          ? "success"
-                          : item.returnStatus === "Rejected"
-                            ? "error"
-                            : "warning"
-                      }
-                    />
-                  </Box>
-                )}
-              </Box>
-            </Box>
-
-            <Divider sx={{ my: 2 }} />
-
-            <Typography fontWeight={700} mb={2}>
-              Tracking History
-            </Typography>
-
-            {item.trackingHistory.length === 0 ? (
-              <Typography>No Tracking Available</Typography>
-            ) : (
-              item.trackingHistory.map((track, index) => (
-                <Box
-                  key={index}
+              >
+                <CardMedia
+                  component="img"
+                  image={`http://localhost:5000/uploads/${item.product.image}`}
                   sx={{
-                    mb: 2,
-                    pl: 2,
-                    borderLeft: "4px solid green",
+                    width: { xs: "100%", sm: 120 },
+                    height: { xs: 180, sm: 120 },
+                    objectFit: "cover",
+                    borderRadius: "12px",
+                    flexShrink: 0,
+                    border: "1px solid #eee",
                   }}
-                >
-                  <Typography fontWeight={700}>{track.status}</Typography>
+                />
 
-                  <Typography variant="body2">
-                    {new Date(track.updatedAt).toLocaleString()}
+                <Box sx={{ flex: 1, minWidth: 0 }}>
+                  <Typography variant="h6" fontWeight={600} sx={{ wordBreak: "break-word" }}>
+                    {item.productName}
                   </Typography>
+
+                  <Stack
+                    direction="row"
+                    flexWrap="wrap"
+                    columnGap={3}
+                    rowGap={0.3}
+                    mt={0.5}
+                  >
+                    <Typography variant="body2" color="text.secondary">
+                      Qty : {item.quantity}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      Accepted : {item.acceptedQty}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      Cancelled : {item.cancelledQty}
+                    </Typography>
+                  </Stack>
+
+                  <Typography color="primary" fontWeight={700} mt={1}>
+                    ₹{item.price}
+                  </Typography>
+
+                  <Chip sx={{ mt: 1.5, fontWeight: 500 }} label={item.itemStatus} size="small" />
+
+                  {item.returnStatus !== "None" && (
+                    <Box mt={1.5}>
+                      <Typography fontWeight={600} variant="body2">
+                        Return Status
+                      </Typography>
+                      <Chip
+                        size="small"
+                        sx={{ mt: 0.5, fontWeight: 500 }}
+                        label={item.returnStatus}
+                        color={
+                          item.returnStatus === "Returned"
+                            ? "success"
+                            : item.returnStatus === "Rejected"
+                              ? "error"
+                              : "warning"
+                        }
+                      />
+                    </Box>
+                  )}
                 </Box>
-              ))
-            )}
-            {item.itemStatus === "Delivered" &&
-              item.returnStatus === "None" && <Button>Request Return</Button>}
+              </Box>
+
+              <Divider sx={{ my: 2.5 }} />
+
+              <Typography fontWeight={700} mb={1.5}>
+                Tracking History
+              </Typography>
+
+              {item.trackingHistory.length === 0 ? (
+                <Typography variant="body2" color="text.secondary">
+                  No Tracking Available
+                </Typography>
+              ) : (
+                <Stack spacing={1.5}>
+                  {item.trackingHistory.map((track, index) => (
+                    <Box
+                      key={index}
+                      sx={{
+                        pl: 2,
+                        borderLeft: "3px solid",
+                        borderColor: "success.main",
+                      }}
+                    >
+                      <Typography fontWeight={700}>{track.status}</Typography>
+
+                      <Typography variant="body2" color="text.secondary">
+                        {new Date(track.updatedAt).toLocaleString()}
+                      </Typography>
+                    </Box>
+                  ))}
+                </Stack>
+              )}
+
+              {item.itemStatus === "Delivered" && item.returnStatus === "None" && (
+                <Button
+                  variant="outlined"
+                  sx={{ mt: 2, borderRadius: "10px", textTransform: "none" }}
+                >
+                  Request Return
+                </Button>
+              )}
+            </CardContent>
+          </Card>
+        ))}
+      </Stack>
+
+      {order.paymentStatus === "Refunded" && (
+        <Card sx={{ ...cardSx, mb: 3 }}>
+          <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
+            <Stack direction="row" alignItems="center" spacing={1} mb={1.5}>
+              <PaidIcon color="success" />
+              <Typography variant="h6" fontWeight={700}>
+                Refund Details
+              </Typography>
+            </Stack>
+
+            <Stack spacing={0.4}>
+              <Typography>Amount : ₹{order.refundAmount}</Typography>
+              <Typography>Status : {order.paymentStatus}</Typography>
+              <Typography>
+                Date : {new Date(order.refundDate).toLocaleString()}
+              </Typography>
+            </Stack>
           </CardContent>
         </Card>
-      ))}
-      {order.paymentStatus === "Refunded" && (
-        <Box
-          mt={3}
-          p={2}
-          sx={{
-            border: "1px solid #ddd",
-            borderRadius: 2,
-          }}
-        >
-          <Typography variant="h6" fontWeight={700}>
-            💰 Refund Details
-          </Typography>
-
-          <Typography>Amount : ₹{order.refundAmount}</Typography>
-
-          <Typography>Status :{order.paymentStatus}</Typography>
-
-          <Typography>
-            Date :{new Date(order.refundDate).toLocaleString()}
-          </Typography>
-        </Box>
       )}
-      {order.orderStatus === "Delivered" && (
-        <Button variant="contained" onClick={repeatOrder}>
-          Repeat Order
-        </Button>
-      )}
-      {order.orderStatus === "Delivered" && (
-        <Button variant="contained" onClick={downloadInvoice}>
-          Download Invoice
-        </Button>
-      )}
+
+      <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
+        {order.orderStatus === "Delivered" && (
+          <Button
+            variant="contained"
+            onClick={repeatOrder}
+            fullWidth
+            sx={{ borderRadius: "10px", textTransform: "none", py: 1.2 }}
+          >
+            Repeat Order
+          </Button>
+        )}
+
+        {order.orderStatus === "Delivered" && (
+          <Button
+            variant="outlined"
+            onClick={downloadInvoice}
+            fullWidth
+            sx={{ borderRadius: "10px", textTransform: "none", py: 1.2 }}
+          >
+            Download Invoice
+          </Button>
+        )}
+      </Stack>
     </Box>
   );
 };

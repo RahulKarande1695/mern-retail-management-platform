@@ -33,139 +33,132 @@ const AssignedOrders = () => {
   };
 
   return (
-    <Box p={3}>
+    <Box sx={{ p: { xs: 2, sm: 3 } }}>
       <Typography
         variant="h5"
         fontWeight={700}
-        mb={3}
+        mb={{ xs: 2, sm: 3 }}
+        sx={{ fontSize: { xs: "1.25rem", sm: "1.5rem" } }}
       >
         Assigned Orders
       </Typography>
 
-      <Grid container spacing={3}>
+      <Grid container spacing={{ xs: 2, sm: 3 }}>
         {orders.length > 0 ? (
           orders.map((order) => (
-            <Grid
-              item
-              xs={12}
-              md={6}
-              lg={4}
-              key={order._id}
-            >
-              <Card>
-                <CardContent>
-
+            <Grid item xs={12} sm={6} lg={4} key={order._id}>
+              <Card
+                sx={{
+                  borderRadius: "16px",
+                  border: "1px solid #eaeaea",
+                  boxShadow: "0 2px 12px rgba(0,0,0,0.05)",
+                  height: "100%",
+                  display: "flex",
+                  flexDirection: "column",
+                  transition: "box-shadow 0.2s ease, transform 0.2s ease",
+                  "&:hover": {
+                    boxShadow: "0 6px 18px rgba(0,0,0,0.1)",
+                    transform: "translateY(-2px)",
+                  },
+                }}
+              >
+                <CardContent
+                  sx={{
+                    p: { xs: 2, sm: 2.5 },
+                    flex: 1,
+                    display: "flex",
+                    flexDirection: "column",
+                  }}
+                >
                   <Stack
                     direction="row"
                     justifyContent="space-between"
+                    alignItems="center"
+                    gap={1}
                     mb={2}
                   >
                     <Typography
                       fontWeight={700}
+                      sx={{
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        whiteSpace: "nowrap",
+                        minWidth: 0,
+                      }}
                     >
                       {order.orderNumber}
                     </Typography>
 
                     <Chip
-                      label={
-                        order.orderStatus
-                      }
+                      label={order.orderStatus}
                       color="primary"
+                      size="small"
+                      sx={{ fontWeight: 600, flexShrink: 0 }}
                     />
                   </Stack>
 
-                  <Typography>
-                    <strong>
-                      Customer :
-                    </strong>{" "}
-                    {
-                      order.customer
-                        ?.name
-                    }
-                  </Typography>
+                  <Stack spacing={0.6} sx={{ flex: 1 }}>
+                    <Typography sx={{ wordBreak: "break-word" }}>
+                      <strong>Customer :</strong> {order.customer?.name}
+                    </Typography>
 
-                  <Typography>
-                    <strong>
-                      Mobile :
-                    </strong>{" "}
-                    {
-                      order.customer
-                        ?.mobile
-                    }
-                  </Typography>
+                    <Typography>
+                      <strong>Mobile :</strong> {order.customer?.mobile}
+                    </Typography>
 
-                  <Typography mt={1}>
-                    <strong>
-                      Total :
-                    </strong>{" "}
-                    ₹
-                    {
-                      order.totalAmount
-                    }
-                  </Typography>
+                    <Typography>
+                      <strong>Total :</strong> ₹{order.totalAmount}
+                    </Typography>
 
-                  <Typography mt={1}>
-                    <strong>
-                      Items :
-                    </strong>{" "}
-                    {
-                      order.items
-                        ?.length
-                    }
-                  </Typography>
+                    <Typography>
+                      <strong>Items :</strong> {order.items?.length}
+                    </Typography>
 
-                  <Typography mt={1}>
-                    <strong>
-                      Address :
-                    </strong>
-                  </Typography>
+                    <Box sx={{ pt: 0.5 }}>
+                      <Typography>
+                        <strong>Address :</strong>
+                      </Typography>
 
-                  <Typography
-                    variant="body2"
-                  >
-                    {
-                      order
-                        .deliveryAddress
-                        ?.houseNo
-                    }
-                    ,{" "}
-                    {
-                      order
-                        .deliveryAddress
-                        ?.area
-                    }
-                    ,{" "}
-                    {
-                      order
-                        .deliveryAddress
-                        ?.city
-                    }
-                  </Typography>
+                      <Typography
+                        variant="body2"
+                        color="text.secondary"
+                        sx={{
+                          display: "-webkit-box",
+                          WebkitLineClamp: 2,
+                          WebkitBoxOrient: "vertical",
+                          overflow: "hidden",
+                        }}
+                      >
+                        {order.deliveryAddress?.houseNo}, {order.deliveryAddress?.area},{" "}
+                        {order.deliveryAddress?.city}
+                      </Typography>
+                    </Box>
+                  </Stack>
 
                   <Button
                     fullWidth
-                    sx={{ mt: 3 }}
+                    sx={{ mt: 2.5, borderRadius: "10px", textTransform: "none" }}
                     variant="contained"
-                    onClick={() =>
-                      navigate(
-                        `/delivery/orders/${order._id}`
-                      )
-                    }
+                    onClick={() => navigate(`/delivery/orders/${order._id}`)}
                   >
                     View Order
                   </Button>
-
                 </CardContent>
               </Card>
             </Grid>
           ))
         ) : (
           <Grid item xs={12}>
-            <Card>
-              <CardContent>
-                <Typography
-                  align="center"
-                >
+            <Card
+              sx={{
+                borderRadius: "16px",
+                border: "1px solid #eaeaea",
+                boxShadow: "none",
+                bgcolor: "#fafafa",
+              }}
+            >
+              <CardContent sx={{ py: 5 }}>
+                <Typography align="center" color="text.secondary">
                   No Assigned Orders
                 </Typography>
               </CardContent>

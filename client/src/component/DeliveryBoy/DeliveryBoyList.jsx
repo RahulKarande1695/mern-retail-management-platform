@@ -5,44 +5,60 @@ import {
   Button,
   Chip,
   MenuItem,
-  Paper,
+  TextField,
   Table,
   TableBody,
   TableCell,
-  TableContainer,
   TableHead,
   TableRow,
-  TextField,
+  TablePagination,
 } from "@mui/material";
 
 import { useNavigate } from "react-router-dom";
 
 import api from "../../api/axios";
 
+import PageContainer from "../common/PageContainer";
+
+import TableWrapper from "../common/TableWrapper";
+
+import Loader from "../common/Loader";
+
+import usePagination from "../../hooks/usePagination";
+
+import TablePaginationActions from "../common/TablePaginationActions";
+
 const DeliveryBoyList = () => {
   const navigate = useNavigate();
 
   const [deliveryBoys, setDeliveryBoys] = useState([]);
+
   const [availability, setAvailability] = useState("");
+
+  const [loading, setLoading] = useState(true);
+
+  const { page, rowsPerPage, setPage, handleRows, paginate } = usePagination();
 
   useEffect(() => {
     getDeliveryBoys();
-  }, []);
+  }, [availability]);
 
   const getDeliveryBoys = async () => {
     try {
-      const res = await api.get("/deliveryBoy");
+      setLoading(true);
+
+      const res = await api.get(`/deliveryBoy?available=${availability}`);
 
       setDeliveryBoys(res.data);
     } catch (err) {
       console.log(err);
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleDelete = async (id) => {
-    const confirmDelete = window.confirm(
-      "Delete Delivery Boy?"
-    );
+    const confirmDelete = window.confirm("Delete Delivery Boy?");
 
     if (!confirmDelete) return;
 
@@ -55,226 +71,150 @@ const DeliveryBoyList = () => {
     }
   };
 
-  const filteredData = availability
-    ? deliveryBoys.filter(
-        (item) =>
-          String(item.isAvailable) === availability
-      )
-    : deliveryBoys;
+  if (loading) return <Loader />;
 
   return (
-    <Box
-      sx={{
-        background: "#FFFFFF",
-        padding: "15px",
-        margin: "10px",
-        minHeight: "85vh",
-        boxShadow: "0px 1px 4px rgba(0,0,0,.2)",
-      }}
-    >
+    <PageContainer>
+      {/* Header */}
+
       <Box
         display="flex"
         justifyContent="space-between"
         alignItems="center"
         mb={3}
+        flexWrap="wrap"
+        gap={2}
       >
         <h2>Delivery Boys</h2>
 
-        <Box display="flex" gap={2}>
+        <Box display="flex" gap={2} flexWrap="wrap">
           <TextField
             select
-            label="Availability"
             size="small"
+            label="Availability"
             value={availability}
-            onChange={(e) =>
-              setAvailability(e.target.value)
-            }
             sx={{
               width: 170,
             }}
+            onChange={(e) => setAvailability(e.target.value)}
           >
-            <MenuItem value="">
-              All
-            </MenuItem>
+            <MenuItem value="">All</MenuItem>
 
-            <MenuItem value="true">
-              Available
-            </MenuItem>
+            <MenuItem value="true">Available</MenuItem>
 
-            <MenuItem value="false">
-              Busy
-            </MenuItem>
+            <MenuItem value="false">Busy</MenuItem>
           </TextField>
 
           <Button
             variant="contained"
-            onClick={() =>
-              navigate("/dgflake/deliveryBoy/add")
-            }
+            onClick={() => navigate("/dgflake/deliveryBoy/add")}
           >
             Add Delivery Boy
           </Button>
         </Box>
       </Box>
 
-      <TableContainer component={Paper}>
+      <TableWrapper>
         <Table>
-
           <TableHead
             sx={{
               background: "#FFF8B7",
             }}
           >
             <TableRow>
+              <TableCell>Sr</TableCell>
 
-              <TableCell>
-                Sr No.
-              </TableCell>
+              <TableCell>Name</TableCell>
 
-              <TableCell>
-                Name
-              </TableCell>
+              <TableCell>Mobile</TableCell>
 
-              <TableCell>
-                Mobile
-              </TableCell>
+              <TableCell>Vehicle</TableCell>
 
-              <TableCell>
-                Vehicle
-              </TableCell>
+              <TableCell>Available</TableCell>
 
-              <TableCell>
-                Available
-              </TableCell>
+              <TableCell>Verified</TableCell>
 
-              <TableCell>
-                Verified
-              </TableCell>
-
-              <TableCell align="center">
-                Action
-              </TableCell>
-
+              <TableCell align="center">Action</TableCell>
             </TableRow>
           </TableHead>
 
           <TableBody>
-
-            {filteredData.length === 0 && (
+            {deliveryBoys.length === 0 && (
               <TableRow>
-                <TableCell
-                  colSpan={7}
-                  align="center"
-                >
+                <TableCell colSpan={7} align="center">
                   No Delivery Boys Found
                 </TableCell>
               </TableRow>
             )}
 
-            {filteredData.map(
-              (item, index) => (
-                <TableRow
-                  key={item._id}
-                >
-                  <TableCell>
-                    {index + 1}
-                  </TableCell>
+            {paginate(deliveryBoys).map((item, index) => (
+              <TableRow key={item._id}>
+                <TableCell>{page * rowsPerPage + index + 1}</TableCell>
 
-                  <TableCell>
-                    {item.name}
-                  </TableCell>
+                <TableCell>{item.name}</TableCell>
 
-                  <TableCell>
-                    {item.mobile}
-                  </TableCell>
+                <TableCell>{item.mobile}</TableCell>
 
-                  <TableCell>
-                    {item.vehicleType}
-                  </TableCell>
+                <TableCell>{item.vehicleType}</TableCell>
 
-                  <TableCell>
+                <TableCell>
+                  <Chip
+                    size="small"
+                    color={item.isAvailable ? "success" : "warning"}
+                    label={item.isAvailable ? "Available" : "Busy"}
+                  />
+                </TableCell>
 
-                    <Chip
-                      size="small"
-                      color={
-                        item.isAvailable
-                          ? "success"
-                          : "warning"
-                      }
-                      label={
-                        item.isAvailable
-                          ? "Available"
-                          : "Busy"
-                      }
-                    />
+                <TableCell>
+                  <Chip
+                    size="small"
+                    color={item.isVerified ? "success" : "default"}
+                    label={item.isVerified ? "Verified" : "Pending"}
+                  />
+                </TableCell>
 
-                  </TableCell>
-
-                  <TableCell>
-
-                    <Chip
-                      size="small"
-                      color={
-                        item.isVerified
-                          ? "success"
-                          : "default"
-                      }
-                      label={
-                        item.isVerified
-                          ? "Verified"
-                          : "Pending"
-                      }
-                    />
-
-                  </TableCell>
-
-                  <TableCell
-                    align="center"
+                <TableCell align="center">
+                  <Button
+                    size="small"
+                    onClick={() => navigate(`/dgflake/deliveryBoy/${item._id}`)}
                   >
-                    <Button
-                      size="small"
-                      onClick={() =>
-                        navigate(
-                          `/dgflake/deliveryBoy/${item._id}`
-                        )
-                      }
-                    >
-                      View
-                    </Button>
+                    View
+                  </Button>
 
-                    <Button
-                      size="small"
-                      onClick={() =>
-                        navigate(
-                          `/dgflake/deliveryBoy/edit/${item._id}`
-                        )
-                      }
-                    >
-                      Edit
-                    </Button>
+                  <Button
+                    size="small"
+                    onClick={() =>
+                      navigate(`/dgflake/deliveryBoy/edit/${item._id}`)
+                    }
+                  >
+                    Edit
+                  </Button>
 
-                    <Button
-                      color="error"
-                      size="small"
-                      onClick={() =>
-                        handleDelete(
-                          item._id
-                        )
-                      }
-                    >
-                      Delete
-                    </Button>
-                  </TableCell>
-
-                </TableRow>
-              )
-            )}
-
+                  <Button
+                    color="error"
+                    size="small"
+                    onClick={() => handleDelete(item._id)}
+                  >
+                    Delete
+                  </Button>
+                </TableCell>
+              </TableRow>
+            ))}
           </TableBody>
-
         </Table>
-      </TableContainer>
-    </Box>
+      </TableWrapper>
+
+      <TablePagination
+        component="div"
+        count={deliveryBoys.length}
+        page={page}
+        rowsPerPage={rowsPerPage}
+        rowsPerPageOptions={[5, 10, 25]}
+        onPageChange={(e, p) => setPage(p)}
+        onRowsPerPageChange={handleRows}
+        ActionsComponent={TablePaginationActions}
+      />
+    </PageContainer>
   );
 };
 

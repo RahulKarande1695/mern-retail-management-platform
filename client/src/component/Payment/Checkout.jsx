@@ -62,12 +62,17 @@ const Checkout = () => {
   };
 
   return (
-    <Box p={3}>
-      <Typography variant="h4" mb={3}>
+    <Box sx={{ p: { xs: 2, sm: 3 }, maxWidth: 1200, mx: "auto" }}>
+      <Typography
+        variant="h4"
+        fontWeight={700}
+        mb={{ xs: 2, sm: 3 }}
+        sx={{ fontSize: { xs: "1.4rem", sm: "2rem" } }}
+      >
         Checkout
       </Typography>
 
-      <Grid container spacing={3}>
+      <Grid container spacing={{ xs: 2, sm: 3 }}>
         <Grid item xs={12} md={8}>
           <AddressSection
             addresses={addresses}
@@ -78,14 +83,24 @@ const Checkout = () => {
         </Grid>
 
         <Grid item xs={12} md={4}>
-          <BillSummary cart={cart} />
+          <Box
+            sx={{
+              position: { md: "sticky" },
+              top: { md: 16 },
+              display: "flex",
+              flexDirection: "column",
+              gap: { xs: 2, sm: 3 },
+            }}
+          >
+            <BillSummary cart={cart} />
 
-          <PaymentSection
-            paymentMethod={paymentMethod}
-            setPaymentMethod={setPaymentMethod}
-            handlePayment={handlePayment}
-            selectedAddress={selectedAddress}
-          />
+            <PaymentSection
+              paymentMethod={paymentMethod}
+              setPaymentMethod={setPaymentMethod}
+              handlePayment={handlePayment}
+              selectedAddress={selectedAddress}
+            />
+          </Box>
         </Grid>
       </Grid>
     </Box>

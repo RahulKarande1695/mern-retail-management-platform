@@ -1,4 +1,4 @@
-import { Box, CircularProgress, Typography } from "@mui/material";
+import { Box, CircularProgress, Stack, Typography } from "@mui/material";
 import { useEffect, useState } from "react";
 
 import api from "../../api/axios";
@@ -35,8 +35,7 @@ const CustomerOrders = () => {
 
       const activeOrder = orders.find(
         (item) =>
-          item.orderStatus !== "Delivered" &&
-          item.orderStatus !== "Cancelled"
+          item.orderStatus !== "Delivered" && item.orderStatus !== "Cancelled"
       );
 
       setCurrentOrder(activeOrder || null);
@@ -44,8 +43,7 @@ const CustomerOrders = () => {
       setHistory(
         orders.filter(
           (item) =>
-            item.orderStatus === "Delivered" ||
-            item.orderStatus === "Cancelled"
+            item.orderStatus === "Delivered" || item.orderStatus === "Cancelled"
         )
       );
     } catch (err) {
@@ -73,34 +71,25 @@ const CustomerOrders = () => {
       sx={{
         maxWidth: "1200px",
         margin: "auto",
-        p: 3,
+        p: { xs: 2, sm: 3 },
       }}
     >
       <Typography
         variant="h4"
         fontWeight={700}
-        mb={3}
+        mb={{ xs: 2, sm: 3 }}
+        sx={{ fontSize: { xs: "1.4rem", sm: "2rem" } }}
       >
         My Orders
       </Typography>
 
-      {cart?.items?.length > 0 && (
-        <CartSection
-          cart={cart}
-          refresh={loadData}
-        />
-      )}
+      <Stack spacing={{ xs: 2, sm: 3 }}>
+        {cart?.items?.length > 0 && <CartSection cart={cart} refresh={loadData} />}
 
-      {currentOrder && (
-        <CurrentOrder
-          order={currentOrder}
-          refresh={loadData}
-        />
-      )}
+        {currentOrder && <CurrentOrder order={currentOrder} refresh={loadData} />}
 
-      <OrderHistory
-        orders={history}
-      />
+        <OrderHistory orders={history} />
+      </Stack>
     </Box>
   );
 };

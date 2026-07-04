@@ -1,39 +1,42 @@
-import { Box } from "@mui/material";
-
-import { useNavigate } from "react-router-dom";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+
+import DeliveryBoyForm from "./DeliveryBoyForm";
 
 import api from "../../api/axios";
-import DeliveryBoyForm from "./DeliveryBoyForm";
+
+import PageContainer from "../common/PageContainer";
+
+const initialState = {
+  name: "",
+  email: "",
+  mobile: "",
+  password: "",
+
+  photo: null,
+
+  aadhaarNumber: "",
+  aadhaarImage: null,
+
+  panNumber: "",
+  panImage: null,
+
+  drivingLicenseNumber: "",
+  drivingLicenseImage: null,
+
+  vehicleType: "",
+  vehicleNumber: "",
+
+  bankName: "",
+  accountHolderName: "",
+  accountNumber: "",
+  ifscCode: "",
+};
 
 const AddDeliveryBoy = () => {
   const navigate = useNavigate();
 
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    mobile: "",
-    password: "",
-
-    photo: null,
-
-    aadhaarNumber: "",
-    aadhaarImage: null,
-
-    panNumber: "",
-    panImage: null,
-
-    drivingLicenseNumber: "",
-    drivingLicenseImage: null,
-
-    vehicleType: "",
-    vehicleNumber: "",
-
-    bankName: "",
-    accountHolderName: "",
-    accountNumber: "",
-    ifscCode: "",
-  });
+  const [formData, setFormData] = useState(initialState);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -41,8 +44,10 @@ const AddDeliveryBoy = () => {
     try {
       const data = new FormData();
 
-      Object.keys(formData).forEach((key) => {
-        data.append(key, formData[key]);
+      Object.entries(formData).forEach(([key, value]) => {
+        if (value) {
+          data.append(key, value);
+        }
       });
 
       await api.post("/deliveryBoy", data, {
@@ -51,29 +56,16 @@ const AddDeliveryBoy = () => {
         },
       });
 
-      alert("Delivery Boy Added Successfully");
+      alert("Delivery Boy Added");
 
       navigate("/dgflake/deliveryBoy");
     } catch (err) {
-      console.log(err);
-
-      alert(
-        err.response?.data?.message ||
-          "Something went wrong"
-      );
+      alert(err.response?.data?.message || "Something went wrong");
     }
   };
 
   return (
-    <Box
-      sx={{
-        background: "#fff",
-        p: 3,
-        m: 2,
-        borderRadius: 2,
-        boxShadow: 2,
-      }}
-    >
+    <PageContainer>
       <h2>Add Delivery Boy</h2>
 
       <DeliveryBoyForm
@@ -82,7 +74,7 @@ const AddDeliveryBoy = () => {
         handleSubmit={handleSubmit}
         submitLabel="Add Delivery Boy"
       />
-    </Box>
+    </PageContainer>
   );
 };
 

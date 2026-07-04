@@ -1,25 +1,26 @@
 import { Box } from "@mui/material";
-import SearchBar from "../searchbar";
-import CategoryTable from "./categoryTable";
 import { useState } from "react";
+
+import SearchBar from "../searchbar";
+import PageContainer from "../common/PageContainer";
+import CategoryTable from "./categoryTable";
 
 const CategoriesList = () => {
   const [search, setSearch] = useState("");
+
   return (
-    <Box
-      sx={{
-        background: "#FFFFFF",
-        boxShadow: "0px 1px 4px 0px #000000",
-        padding: "10px",
-        margin: "10px",
-        height: "85vh",
-      }}
-    >
-      <SearchBar title="Category" onSearch={setSearch}  addRoute="addcategories"/>
-      <Box sx={{ marginTop: "30px" }}>
+    <PageContainer>
+      <SearchBar
+        title="Category"
+        onSearch={setSearch}
+        addRoute="addcategories"
+      />
+
+      <Box mt={3}>
         <CategoryTable search={search} />
       </Box>
-    </Box>
+    </PageContainer>
   );
 };
+
 export default CategoriesList;

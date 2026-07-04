@@ -9,14 +9,31 @@ const DeliveryBoyForm = ({
   const handleChange = (e) => {
     const { name, value, files } = e.target;
 
-    setFormData((prev) => ({
-      ...prev,
+    setFormData({
+      ...formData,
+
       [name]: files ? files[0] : value,
-    }));
+    });
   };
 
   return (
-    <Box component="form" onSubmit={handleSubmit}>
+    <Box
+      component="form"
+      onSubmit={handleSubmit}
+      sx={{
+        display: "grid",
+
+        gridTemplateColumns: {
+          xs: "1fr",
+
+          sm: "repeat(2,1fr)",
+
+          md: "repeat(3,1fr)",
+        },
+
+        gap: 2,
+      }}
+    >
       <Grid container spacing={2}>
         {/* ---------- Personal Details ---------- */}
 
@@ -26,12 +43,10 @@ const DeliveryBoyForm = ({
 
         <Grid item xs={6}>
           <TextField
-            fullWidth
-            label="Name"
             name="name"
+            label="Name"
             value={formData.name}
             onChange={handleChange}
-            required
           />
         </Grid>
 
@@ -74,15 +89,9 @@ const DeliveryBoyForm = ({
         </Grid>
 
         <Grid item xs={12}>
-          <Button component="label" variant="outlined">
+          <Button component="label">
             Upload Photo
-            <input
-              hidden
-              type="file"
-              name="photo"
-              accept="image/*"
-              onChange={handleChange}
-            />
+            <input hidden type="file" name="photo" onChange={handleChange} />
           </Button>
         </Grid>
 

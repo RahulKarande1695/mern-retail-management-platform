@@ -21,38 +21,26 @@ import Loader from "../common/Loader";
 
 import usePagination from "../../hooks/usePagination";
 
-import TablePaginationActions from "../common/TablePaginationActions";
-
-const BrandsTable = ({ search }) => {
+const ProductTable = ({ search }) => {
   const navigate = useNavigate();
 
-  const [brands, setBrands] = useState([]);
+  const [products, setProducts] = useState([]);
 
   const [loading, setLoading] = useState(true);
 
-  const {
-    page,
-
-    rowsPerPage,
-
-    setPage,
-
-    handleRows,
-
-    paginate,
-  } = usePagination();
+  const { page, rowsPerPage, setPage, handleRows, paginate } = usePagination();
 
   useEffect(() => {
-    getBrands();
+    getProducts();
   }, [search]);
 
-  const getBrands = async () => {
+  const getProducts = async () => {
     try {
       setLoading(true);
 
-      const res = await api.get(`/brands?search=${search}`);
+      const res = await api.get(`/products?search=${search}`);
 
-      setBrands(res.data);
+      setProducts(res.data);
     } catch (err) {
       console.log(err);
     } finally {
@@ -60,16 +48,12 @@ const BrandsTable = ({ search }) => {
     }
   };
 
-  const handleDelete = async (id) => {
-    if (!window.confirm("Delete Brand?")) return;
+  const deleteProduct = async (id) => {
+    if (!window.confirm("Delete Product?")) return;
 
-    try {
-      await api.delete(`/brands/${id}`);
+    await api.delete(`/products/${id}`);
 
-      getBrands();
-    } catch (err) {
-      console.log(err);
-    }
+    getProducts();
   };
 
   if (loading) return <Loader />;
@@ -86,9 +70,15 @@ const BrandsTable = ({ search }) => {
             <TableRow>
               <TableCell>Sr</TableCell>
 
-              <TableCell>Brand</TableCell>
+              <TableCell>Name</TableCell>
 
               <TableCell>Category</TableCell>
+
+              <TableCell>Brand</TableCell>
+
+              <TableCell>Stock</TableCell>
+
+              <TableCell>MRP</TableCell>
 
               <TableCell>Status</TableCell>
 
@@ -97,15 +87,7 @@ const BrandsTable = ({ search }) => {
           </TableHead>
 
           <TableBody>
-            {brands.length === 0 && (
-              <TableRow>
-                <TableCell colSpan={5} align="center">
-                  No Brands Found
-                </TableCell>
-              </TableRow>
-            )}
-
-            {paginate(brands).map((item, index) => (
+            {paginate(products).map((item, index) => (
               <TableRow key={item._id}>
                 <TableCell>{page * rowsPerPage + index + 1}</TableCell>
 
@@ -113,26 +95,34 @@ const BrandsTable = ({ search }) => {
 
                 <TableCell>{item.category?.name}</TableCell>
 
+                <TableCell>{item.brand?.name}</TableCell>
+
+                <TableCell>{item.stock}</TableCell>
+
+                <TableCell>₹{item.mrp}</TableCell>
+
                 <TableCell>
                   <Chip
                     size="small"
-                    label={item.status ? "Active" : "Inactive"}
                     color={item.status ? "success" : "default"}
+                    label={item.status ? "Active" : "Inactive"}
                   />
                 </TableCell>
 
                 <TableCell align="center">
                   <Button
                     size="small"
-                    onClick={() => navigate(`/dgflake/brands/edit/${item._id}`)}
+                    onClick={() =>
+                      navigate(`/dgflake/products/edit/${item._id}`)
+                    }
                   >
                     Edit
                   </Button>
 
                   <Button
-                    size="small"
                     color="error"
-                    onClick={() => handleDelete(item._id)}
+                    size="small"
+                    onClick={() => deleteProduct(item._id)}
                   >
                     Delete
                   </Button>
@@ -145,16 +135,14 @@ const BrandsTable = ({ search }) => {
 
       <TablePagination
         component="div"
-        count={brands.length}
+        count={products.length}
         page={page}
         rowsPerPage={rowsPerPage}
-        rowsPerPageOptions={[5, 10, 25]}
-        onPageChange={(e, p) => setPage(p)}
+        onPageChange={(e, newPage) => setPage(newPage)}
         onRowsPerPageChange={handleRows}
-        ActionsComponent={TablePaginationActions}
       />
     </>
   );
 };
 
-export default BrandsTable;
+export default ProductTable;

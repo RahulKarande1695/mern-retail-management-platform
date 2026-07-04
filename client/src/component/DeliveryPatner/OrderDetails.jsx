@@ -16,6 +16,14 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 
 import api from "../../api/axios";
+import DeliveryMap from "../map/DeliveryMap";
+
+const cardSx = {
+  borderRadius: "16px",
+  border: "1px solid #eaeaea",
+  boxShadow: "0 2px 12px rgba(0,0,0,0.05)",
+  height: "100%",
+};
 
 const DeliveryOrderDetails = () => {
   const { id } = useParams();
@@ -108,45 +116,77 @@ const DeliveryOrderDetails = () => {
   };
 
   const openGoogleMap = () => {
-    const lat = order.deliveryAddress?.location?.lat;
+    const location = order?.deliveryAddress?.location;
 
-    const lng = order.deliveryAddress?.location?.lng;
-
-    if (!lat || !lng) {
-      alert("Location not available");
+    if (!location) {
+      alert("Customer location not available");
       return;
     }
 
-    window.open(`https://www.google.com/maps?q=${lat},${lng}`, "_blank");
-  };
+    const { lat, lng } = location;
 
-  if (!order) return <h2>Loading...</h2>;
+    window.open(
+      `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`,
+      "_blank",
+    );
+  };
+  console.log("order.deliveryAddress?.location", order?.deliveryAddress?.location);
+
+  if (!order)
+    return (
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          minHeight: "60vh",
+        }}
+      >
+        <Typography variant="h6" color="text.secondary">
+          Loading...
+        </Typography>
+      </Box>
+    );
 
   return (
-    <Box p={3}>
-      <Typography variant="h5" mb={3}>
+    <Box sx={{ p: { xs: 2, sm: 3 } }}>
+      <Typography
+        variant="h5"
+        mb={{ xs: 2, sm: 3 }}
+        fontWeight={700}
+        sx={{ fontSize: { xs: "1.25rem", sm: "1.5rem" } }}
+      >
         Order Details
       </Typography>
 
-      <Grid container spacing={3}>
+      <Grid container spacing={{ xs: 2, sm: 3 }}>
         {/* Customer */}
 
         <Grid item xs={12} md={6}>
-          <Card>
-            <CardContent>
-              <Typography variant="h6">Customer Details</Typography>
+          <Card sx={cardSx}>
+            <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
+              <Typography variant="h6" fontWeight={600}>
+                Customer Details
+              </Typography>
 
               <Divider sx={{ my: 2 }} />
 
-              <Typography>
-                <strong>Name :</strong> {order.customer?.name}
-              </Typography>
+              <Stack spacing={1}>
+                <Typography sx={{ wordBreak: "break-word" }}>
+                  <strong>Name :</strong> {order.customer?.name}
+                </Typography>
 
-              <Typography>
-                <strong>Mobile :</strong> {order.customer?.mobile}
-              </Typography>
+                <Typography>
+                  <strong>Mobile :</strong> {order.customer?.mobile}
+                </Typography>
+              </Stack>
 
-              <Button startIcon={<Phone />} sx={{ mt: 2 }} variant="contained">
+              <Button
+                startIcon={<Phone />}
+                sx={{ mt: 2.5, borderRadius: "10px", textTransform: "none" }}
+                variant="contained"
+                fullWidth
+              >
                 Call Customer
               </Button>
             </CardContent>
@@ -156,32 +196,59 @@ const DeliveryOrderDetails = () => {
         {/* Address */}
 
         <Grid item xs={12} md={6}>
-          <Card>
-            <CardContent>
-              <Typography variant="h6">Delivery Address</Typography>
+          <Card sx={cardSx}>
+            <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
+              <Typography variant="h6" fontWeight={600}>
+                Delivery Address
+              </Typography>
 
               <Divider sx={{ my: 2 }} />
 
-              <Typography>{order.deliveryAddress?.houseNo}</Typography>
+              <Stack spacing={0.4} sx={{ mb: order.deliveryAddress?.location ? 2 : 0 }}>
+                <Typography sx={{ wordBreak: "break-word" }}>
+                  {order.deliveryAddress?.houseNo}
+                </Typography>
 
-              <Typography>{order.deliveryAddress?.area}</Typography>
+                <Typography sx={{ wordBreak: "break-word" }}>
+                  {order.deliveryAddress?.area}
+                </Typography>
 
-              <Typography>{order.deliveryAddress?.city}</Typography>
+                <Typography>{order.deliveryAddress?.city}</Typography>
 
-              <Typography>{order.deliveryAddress?.district}</Typography>
+                <Typography>{order.deliveryAddress?.district}</Typography>
 
-              <Typography>{order.deliveryAddress?.state}</Typography>
+                <Typography>{order.deliveryAddress?.state}</Typography>
 
-              <Typography>{order.deliveryAddress?.pincode}</Typography>
+                <Typography fontWeight={600}>
+                  {order.deliveryAddress?.pincode}
+                </Typography>
+              </Stack>
 
-              <Button
-                sx={{ mt: 2 }}
-                startIcon={<Room />}
-                variant="outlined"
-                onClick={openGoogleMap}
-              >
-                Open Google Maps
-              </Button>
+              {order.deliveryAddress?.location && (
+                <Box
+                  sx={{
+                    borderRadius: "12px",
+                    overflow: "hidden",
+                    border: "1px solid #e0e0e0",
+                    aspectRatio: "16 / 9",
+                    width: "100%",
+                  }}
+                >
+                  <DeliveryMap customerLocation={order.deliveryAddress.location} />
+                </Box>
+              )}
+
+              {order.deliveryAddress?.location && (
+                <Button
+                  sx={{ mt: 2, borderRadius: "10px", textTransform: "none" }}
+                  startIcon={<Room />}
+                  variant="outlined"
+                  fullWidth
+                  onClick={openGoogleMap}
+                >
+                  Open Google Maps
+                </Button>
+              )}
             </CardContent>
           </Card>
         </Grid>
@@ -189,32 +256,40 @@ const DeliveryOrderDetails = () => {
         {/* Products */}
 
         <Grid item xs={12}>
-          <Card>
-            <CardContent>
-              <Typography variant="h6">Ordered Items</Typography>
+          <Card sx={cardSx}>
+            <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
+              <Typography variant="h6" fontWeight={600}>
+                Ordered Items
+              </Typography>
 
               <Divider sx={{ my: 2 }} />
 
-              {order.items.map((item) => (
-                <Stack
-                  key={item._id}
-                  direction="row"
-                  justifyContent="space-between"
-                  sx={{
-                    py: 1,
-                  }}
-                >
-                  <Box>
-                    <Typography fontWeight={600}>{item.productName}</Typography>
+              <Stack divider={<Divider />} spacing={0}>
+                {order.items.map((item) => (
+                  <Stack
+                    key={item._id}
+                    direction="row"
+                    justifyContent="space-between"
+                    alignItems="center"
+                    gap={2}
+                    sx={{ py: 1.2 }}
+                  >
+                    <Box sx={{ minWidth: 0 }}>
+                      <Typography fontWeight={600} sx={{ wordBreak: "break-word" }}>
+                        {item.productName}
+                      </Typography>
 
-                    <Typography variant="body2">
-                      Qty : {item.quantity}
+                      <Typography variant="body2" color="text.secondary">
+                        Qty : {item.quantity}
+                      </Typography>
+                    </Box>
+
+                    <Typography fontWeight={700} sx={{ flexShrink: 0 }}>
+                      ₹{item.price}
                     </Typography>
-                  </Box>
-
-                  <Typography fontWeight={700}>₹{item.price}</Typography>
-                </Stack>
-              ))}
+                  </Stack>
+                ))}
+              </Stack>
             </CardContent>
           </Card>
         </Grid>
@@ -222,24 +297,25 @@ const DeliveryOrderDetails = () => {
         {/* Tracking */}
 
         <Grid item xs={12}>
-          <Card>
-            <CardContent>
-              <Typography variant="h6">Tracking History</Typography>
+          <Card sx={cardSx}>
+            <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
+              <Typography variant="h6" fontWeight={600}>
+                Tracking History
+              </Typography>
 
               <Divider sx={{ my: 2 }} />
 
-              {order.trackingHistory.map((track, index) => (
-                <Chip
-                  key={index}
-                  sx={{
-                    mr: 1,
-                    mb: 1,
-                  }}
-                  icon={<CheckCircle />}
-                  label={track.status}
-                  color="success"
-                />
-              ))}
+              <Stack direction="row" flexWrap="wrap" gap={1}>
+                {order.trackingHistory.map((track, index) => (
+                  <Chip
+                    key={index}
+                    icon={<CheckCircle />}
+                    label={track.status}
+                    color="success"
+                    sx={{ fontWeight: 500 }}
+                  />
+                ))}
+              </Stack>
             </CardContent>
           </Card>
         </Grid>
@@ -247,23 +323,35 @@ const DeliveryOrderDetails = () => {
         {/* Actions */}
 
         <Grid item xs={12}>
-          <Card>
-            <CardContent>
-              <Typography variant="h6">Delivery Actions</Typography>
+          <Card sx={cardSx}>
+            <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
+              <Typography variant="h6" fontWeight={600}>
+                Delivery Actions
+              </Typography>
 
               <Divider sx={{ my: 2 }} />
 
-              <Stack direction="row" spacing={2}>
+              <Stack
+                direction={{ xs: "column", sm: "row" }}
+                spacing={2}
+                sx={{ "& .MuiButton-root": { borderRadius: "10px", textTransform: "none" } }}
+              >
                 {lastTrackingStatus === "Assigned" && (
-                  <Button onClick={handleAccept}>Accept Delivery</Button>
+                  <Button variant="contained" onClick={handleAccept}>
+                    Accept Delivery
+                  </Button>
                 )}
 
                 {lastTrackingStatus === "Accepted By Delivery Partner" && (
-                  <Button onClick={handlePicked}>Picked Up</Button>
+                  <Button variant="contained" onClick={handlePicked}>
+                    Picked Up
+                  </Button>
                 )}
 
                 {lastTrackingStatus === "Picked Up" && (
-                  <Button onClick={handleDelivered}>Delivered</Button>
+                  <Button variant="contained" onClick={handleDelivered}>
+                    Delivered
+                  </Button>
                 )}
               </Stack>
             </CardContent>

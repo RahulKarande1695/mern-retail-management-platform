@@ -1,11 +1,11 @@
 import {
+  Table,
+  TableHead,
+  TableBody,
+  TableRow,
+  TableCell,
   Button,
   Chip,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableRow,
   TablePagination,
 } from "@mui/material";
 
@@ -21,38 +21,26 @@ import Loader from "../common/Loader";
 
 import usePagination from "../../hooks/usePagination";
 
-import TablePaginationActions from "../common/TablePaginationActions";
-
-const BrandsTable = ({ search }) => {
+const CategoryTable = ({ search }) => {
   const navigate = useNavigate();
 
-  const [brands, setBrands] = useState([]);
+  const [categories, setCategories] = useState([]);
 
   const [loading, setLoading] = useState(true);
 
-  const {
-    page,
-
-    rowsPerPage,
-
-    setPage,
-
-    handleRows,
-
-    paginate,
-  } = usePagination();
+  const { page, rowsPerPage, setPage, handleRows, paginate } = usePagination();
 
   useEffect(() => {
-    getBrands();
+    getCategories();
   }, [search]);
 
-  const getBrands = async () => {
+  const getCategories = async () => {
     try {
       setLoading(true);
 
-      const res = await api.get(`/brands?search=${search}`);
+      const res = await api.get(`/categories?search=${search}`);
 
-      setBrands(res.data);
+      setCategories(res.data);
     } catch (err) {
       console.log(err);
     } finally {
@@ -60,16 +48,12 @@ const BrandsTable = ({ search }) => {
     }
   };
 
-  const handleDelete = async (id) => {
-    if (!window.confirm("Delete Brand?")) return;
+  const deleteCategory = async (id) => {
+    if (!window.confirm("Delete category?")) return;
 
-    try {
-      await api.delete(`/brands/${id}`);
+    await api.delete(`/categories/${id}`);
 
-      getBrands();
-    } catch (err) {
-      console.log(err);
-    }
+    getCategories();
   };
 
   if (loading) return <Loader />;
@@ -86,9 +70,9 @@ const BrandsTable = ({ search }) => {
             <TableRow>
               <TableCell>Sr</TableCell>
 
-              <TableCell>Brand</TableCell>
+              <TableCell>Name</TableCell>
 
-              <TableCell>Category</TableCell>
+              <TableCell>Description</TableCell>
 
               <TableCell>Status</TableCell>
 
@@ -97,21 +81,13 @@ const BrandsTable = ({ search }) => {
           </TableHead>
 
           <TableBody>
-            {brands.length === 0 && (
-              <TableRow>
-                <TableCell colSpan={5} align="center">
-                  No Brands Found
-                </TableCell>
-              </TableRow>
-            )}
-
-            {paginate(brands).map((item, index) => (
+            {paginate(categories).map((item, index) => (
               <TableRow key={item._id}>
                 <TableCell>{page * rowsPerPage + index + 1}</TableCell>
 
                 <TableCell>{item.name}</TableCell>
 
-                <TableCell>{item.category?.name}</TableCell>
+                <TableCell>{item.description}</TableCell>
 
                 <TableCell>
                   <Chip
@@ -123,16 +99,16 @@ const BrandsTable = ({ search }) => {
 
                 <TableCell align="center">
                   <Button
-                    size="small"
-                    onClick={() => navigate(`/dgflake/brands/edit/${item._id}`)}
+                    onClick={() =>
+                      navigate(`/dgflake/categories/edit/${item._id}`)
+                    }
                   >
                     Edit
                   </Button>
 
                   <Button
-                    size="small"
                     color="error"
-                    onClick={() => handleDelete(item._id)}
+                    onClick={() => deleteCategory(item._id)}
                   >
                     Delete
                   </Button>
@@ -145,16 +121,14 @@ const BrandsTable = ({ search }) => {
 
       <TablePagination
         component="div"
-        count={brands.length}
+        count={categories.length}
         page={page}
         rowsPerPage={rowsPerPage}
-        rowsPerPageOptions={[5, 10, 25]}
         onPageChange={(e, p) => setPage(p)}
         onRowsPerPageChange={handleRows}
-        ActionsComponent={TablePaginationActions}
       />
     </>
   );
 };
 
-export default BrandsTable;
+export default CategoryTable;

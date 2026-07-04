@@ -1,47 +1,29 @@
-import { Box } from "@mui/material";
-
 import { useEffect, useState } from "react";
+
 import { useNavigate, useParams } from "react-router-dom";
 
 import api from "../../api/axios";
+
 import DeliveryBoyForm from "./DeliveryBoyForm";
+
+import PageContainer from "../common/PageContainer";
+
+import Loader from "../common/Loader";
 
 const EditDeliveryBoy = () => {
   const { id } = useParams();
 
   const navigate = useNavigate();
 
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    mobile: "",
-    password: "",
+  const [loading, setLoading] = useState(true);
 
-    photo: null,
-
-    aadhaarNumber: "",
-    aadhaarImage: null,
-
-    panNumber: "",
-    panImage: null,
-
-    drivingLicenseNumber: "",
-    drivingLicenseImage: null,
-
-    vehicleType: "",
-    vehicleNumber: "",
-
-    bankName: "",
-    accountHolderName: "",
-    accountNumber: "",
-    ifscCode: "",
-  });
+  const [formData, setFormData] = useState({});
 
   useEffect(() => {
-    getDeliveryBoy();
+    getData();
   }, []);
 
-  const getDeliveryBoy = async () => {
+  const getData = async () => {
     try {
       const res = await api.get(`/deliveryBoy/${id}`);
 
@@ -51,57 +33,37 @@ const EditDeliveryBoy = () => {
       });
     } catch (err) {
       console.log(err);
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    try {
-      const data = new FormData();
+    const data = new FormData();
 
-      Object.keys(formData).forEach((key) => {
-        if (formData[key] !== null) {
-          data.append(key, formData[key]);
-        }
-      });
+    Object.entries(formData).forEach(([key, value]) => {
+      if (value) {
+        data.append(key, value);
+      }
+    });
 
-      await api.put(
-        `/deliveryBoy/${id}`,
-        data,
-        {
-          headers: {
-            "Content-Type":
-              "multipart/form-data",
-          },
-        }
-      );
+    await api.put(`/deliveryBoy/${id}`, data, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
 
-      alert(
-        "Delivery Boy Updated Successfully"
-      );
+    alert("Delivery Boy Updated");
 
-      navigate("/dgflake/deliveryBoy");
-    } catch (err) {
-      console.log(err);
-
-      alert(
-        err.response?.data?.message ||
-          "Something went wrong"
-      );
-    }
+    navigate("/dgflake/deliveryBoy");
   };
 
+  if (loading) return <Loader />;
+
   return (
-    <Box
-      sx={{
-        background: "#fff",
-        p: 3,
-        m: 2,
-        borderRadius: 2,
-        boxShadow: 2,
-      }}
-    >
+    <PageContainer>
       <h2>Edit Delivery Boy</h2>
 
       <DeliveryBoyForm
@@ -110,7 +72,7 @@ const EditDeliveryBoy = () => {
         handleSubmit={handleSubmit}
         submitLabel="Update Delivery Boy"
       />
-    </Box>
+    </PageContainer>
   );
 };
 

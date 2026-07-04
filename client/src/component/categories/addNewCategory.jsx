@@ -74,11 +74,19 @@ const AddNewCategory = () => {
   return (
     <Box
       sx={{
-        background: "#FFFFFF",
-        boxShadow: "0px 1px 4px 0px #000000",
-        padding: "20px",
-        margin: "10px",
-        height: "85vh",
+        display: "grid",
+
+        gridTemplateColumns: {
+          xs: "1fr",
+
+          sm: "repeat(2,1fr)",
+
+          md: "repeat(3,1fr)",
+        },
+
+        gap: 2,
+
+        mt: 3,
       }}
     >
       <Box display={"flex"} gap={"20px"}>

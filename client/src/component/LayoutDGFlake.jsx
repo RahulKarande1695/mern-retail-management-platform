@@ -5,17 +5,38 @@ import { Box } from "@mui/material";
 
 const LayoutDGFlake = () => {
   return (
-    <main className="App">
+    <Box sx={{ display: "flex", flexDirection: "column", height: "100vh", overflow: "hidden" }}>
       <Header />
-      <div className="main-Layout">
-        <Box width={"20vw"} bgcolor={"#F4F4F4"}>
+
+      <Box sx={{ display: "flex", flex: 1, minHeight: 0, overflow: "hidden" }}>
+        <Box
+          sx={{
+            width: { xs: "72px", sm: "220px", md: "20vw" },
+            maxWidth: 280,
+            flexShrink: 0,
+            bgcolor: "#F4F4F4",
+            height: "100%",
+            overflowY: "auto",
+            borderRight: "1px solid #e5e5e5",
+          }}
+        >
           <Sidebar />
         </Box>
-        <Box width={"80vw"}>
+
+        <Box
+          sx={{
+            flex: 1,
+            minWidth: 0,
+            height: "100%",
+            overflowY: "auto",
+            overflowX: "hidden",
+            bgcolor: "#fff",
+          }}
+        >
           <Outlet />
         </Box>
-      </div>
-    </main>
+      </Box>
+    </Box>
   );
 };
 

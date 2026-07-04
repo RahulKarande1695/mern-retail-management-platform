@@ -1,26 +1,22 @@
 import { Box } from "@mui/material";
-import SearchBar from "../searchbar";
-import ProductsTable from "./productsTable";
 import { useState } from "react";
+
+import SearchBar from "../searchbar";
+import PageContainer from "../common/PageContainer";
+import ProductTable from "./productsTable";
 
 const ProductUi = () => {
   const [search, setSearch] = useState("");
 
   return (
-    <Box
-      sx={{
-        background: "#FFFFFF",
-        boxShadow: "0px 1px 4px 0px #000000",
-        padding: "10px",
-        margin: "10px",
-        height: "85vh",
-      }}
-    >
-      <SearchBar title={"Products"} onSearch={setSearch} addRoute="addproducts"/>
-      <Box sx={{ marginTop: "30px" }}>
-        <ProductsTable search={search}/>
+    <PageContainer>
+      <SearchBar title="Products" onSearch={setSearch} addRoute="addproducts" />
+
+      <Box mt={3}>
+        <ProductTable search={search} />
       </Box>
-    </Box>
+    </PageContainer>
   );
 };
+
 export default ProductUi;
