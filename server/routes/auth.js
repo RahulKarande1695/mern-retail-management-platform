@@ -17,7 +17,7 @@ const generateTokens = (account, role) => {
     },
     process.env.JWT_ACCESS_SECRET,
     {
-      expiresIn: "15m",
+      expiresIn: "30m",
     },
   );
 
@@ -28,7 +28,7 @@ const generateTokens = (account, role) => {
     },
     process.env.JWT_REFRESH_SECRET,
     {
-      expiresIn: "7d",
+      expiresIn: "30d",
     },
   );
 

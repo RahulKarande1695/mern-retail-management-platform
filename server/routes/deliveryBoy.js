@@ -45,6 +45,46 @@ router.get("/pending", authMiddleware, async (req, res) => {
   }
 });
 
+router.get("/dashboard", authMiddleware, async (req, res) => {
+  try {
+    const deliveryBoyId = req.user.id;
+
+    const assignedOrders = await Order.countDocuments({
+      deliveryBoy: deliveryBoyId,
+      "trackingHistory.status": "Assigned",
+    });
+
+    const pickedOrders = await Order.countDocuments({
+      deliveryBoy: deliveryBoyId,
+      "trackingHistory.status": "Picked Up",
+    });
+
+    const deliveredOrders = await Order.countDocuments({
+      deliveryBoy: deliveryBoyId,
+      "trackingHistory.status": "Delivered",
+    });
+
+    const cancelledOrders = await Order.countDocuments({
+      deliveryBoy: deliveryBoyId,
+      orderStatus: "Cancelled",
+    });
+
+    res.json({
+      assignedOrders,
+
+      pickedOrders,
+
+      deliveredOrders,
+
+      cancelledOrders,
+    });
+  } catch (err) {
+    res.status(500).json({
+      message: err.message,
+    });
+  }
+});
+
 // GET ALL
 router.get("/", authMiddleware, async (req, res) => {
   try {

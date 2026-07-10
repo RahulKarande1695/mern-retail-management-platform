@@ -79,12 +79,6 @@ const orderItemSchema = new mongoose.Schema({
     enum: ["None", "Requested", "Approved", "Rejected", "Returned"],
     default: "None",
   },
-
-  deliveryAddress: {
-  type: mongoose.Schema.Types.ObjectId,
-  ref: "Address",
-  required: true,
-},
 });
 
 const trackingSchema = new mongoose.Schema(
@@ -119,6 +113,66 @@ const orderSchema = new mongoose.Schema(
     },
 
     items: [orderItemSchema],
+
+    deliveryAddress: {
+      fullName: {
+        type: String,
+      },
+
+      mobile: {
+        type: String,
+      },
+
+      pincode: {
+        type: String,
+      },
+
+      state: {
+        type: String,
+      },
+
+      district: {
+        type: String,
+      },
+
+      city: {
+        type: String,
+      },
+
+      taluka: {
+        type: String,
+      },
+
+      village: {
+        type: String,
+      },
+
+      postOffice: {
+        type: String,
+      },
+
+      houseNo: {
+        type: String,
+      },
+
+      area: {
+        type: String,
+      },
+
+      landmark: {
+        type: String,
+      },
+
+      location: {
+        lat: {
+          type: Number,
+        },
+
+        lng: {
+          type: Number,
+        },
+      },
+    },
 
     totalAmount: {
       type: Number,
@@ -210,13 +264,7 @@ const orderSchema = new mongoose.Schema(
 );
 
 orderSchema.pre("save", function (next) {
-  console.log("===== ORDER SAVE =====");
-  console.log("Order:", this.orderNumber);
-  console.log(
-    "Items:",
-    this.items.map((i) => i._id?.toString()),
-  );
-  console.trace(); // <-- khup important
+  console.trace();
   next();
 });
 

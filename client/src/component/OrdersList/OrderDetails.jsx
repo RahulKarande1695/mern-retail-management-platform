@@ -49,7 +49,7 @@ const OrderDetails = () => {
       const availableDeliveryBoys = res.data.filter(
         (item) => item.isVerified && item.isAvailable,
       );
-
+      console.log(res.data,availableDeliveryBoys)
       setDeliveryBoys(availableDeliveryBoys);
     } catch (err) {
       console.log(err);
@@ -80,7 +80,6 @@ const OrderDetails = () => {
     });
     getOrder();
   };
-
   const handleCancel = async (item) => {
     try {
       await api.post(`/orders/${order._id}/items/${item._id}/cancel`, {

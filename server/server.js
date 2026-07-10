@@ -10,11 +10,13 @@ import brandRoutes from "./routes/brands.js";
 import productRoutes from "./routes/product.js";
 import orderRoutes from "./routes/order.js";
 import cartRoutes from "./routes/cart.js";
-import addressRoutes from "./routes/address.js"
-import checkoutRoutes from "./routes/checkout.js"
+import addressRoutes from "./routes/address.js";
+import checkoutRoutes from "./routes/checkout.js";
 import deliveryBoyRoutes from "./routes/deliveryBoy.js";
-import analyticsRoutes from "./routes/analytics.js"
+import analyticsRoutes from "./routes/analytics.js";
 import path from "path";
+import morgan from "morgan";
+import logger from "./config/logger.js";
 
 dotenv.config();
 
@@ -30,34 +32,20 @@ app.use(
 app.use("/uploads", express.static("uploads"));
 app.use("/categories", categoryRoutes);
 app.use("/products", productRoutes);
-app.use(
-  "/uploads",
-  express.static("uploads")
-);
-app.use(
-  "/brands",
-  brandRoutes
-);
-app.use(
-  "/orders",
-  orderRoutes
-);
-app.use(
-  "/cart",
-  cartRoutes
-);
-app.use(
-  "/address",
-  addressRoutes
-);
-app.use(
-  "/deliveryBoy",
-  deliveryBoyRoutes
-);
+app.use("/uploads", express.static("uploads"));
+app.use("/brands", brandRoutes);
+app.use("/orders", orderRoutes);
+app.use("/cart", cartRoutes);
+app.use("/address", addressRoutes);
+app.use("/deliveryBoy", deliveryBoyRoutes);
 app.use("/checkout", checkoutRoutes);
+app.use("/analytics", analyticsRoutes);
 app.use(
- "/analytics",
- analyticsRoutes
+  morgan("combined", {
+    stream: {
+      write: (message) => logger.info(message.trim()),
+    },
+  }),
 );
 
 mongoose

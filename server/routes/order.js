@@ -130,6 +130,12 @@ router.post(
         status: item.itemStatus,
       });
 
+      if (!order.trackingHistory.some((track) => track.status === "Accepted")) {
+        order.trackingHistory.push({
+          status: "Accepted",
+        });
+      }
+
       updateOrderStatus(order);
 
       await order.save();
@@ -226,6 +232,17 @@ router.post(
       item.trackingHistory.push({
         status: "Packed",
       });
+
+      const allPacked = order.items.every(
+        (item) =>
+          item.itemStatus === "Packed" || item.itemStatus === "Cancelled",
+      );
+
+      if (allPacked) {
+        order.trackingHistory.push({
+          status: "Packed",
+        });
+      }
 
       updateOrderStatus(order);
 
@@ -375,6 +392,12 @@ router.post("/:orderId/assignDeliveryBoy", authMiddleware, async (req, res) => {
       _id: deliveryBoyId,
       status: true,
     });
+
+    if (!deliveryBoy) {
+      return res.status(400).json({
+        message: "No delivery partner available",
+      });
+    }
 
     if (!deliveryBoy) {
       return res.status(404).json({

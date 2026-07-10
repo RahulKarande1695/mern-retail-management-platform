@@ -15,16 +15,6 @@ categories
     "description": "Paneer products",
     "status": true
   },
-  {
-    "name": "Butter",
-    "description": "Butter products",
-    "status": true
-  },
-  {
-    "name": "Ghee",
-    "description": "Pure ghee products",
-    "status": true
-  }
 ]
 
 Brands
@@ -44,16 +34,6 @@ Brands
     "category": "MILK_CATEGORY_ID",
     "status": true
   },
-  {
-    "name": "Chitale",
-    "category": "CURD_CATEGORY_ID",
-    "status": true
-  },
-  {
-    "name": "Warana",
-    "category": "GHEE_CATEGORY_ID",
-    "status": true
-  }
 ]
 
 Product
@@ -64,16 +44,6 @@ Product
     "mrp": 68,
     "sellingPrice": 66,
     "stock": 100,
-    "category": "MILK_CATEGORY_ID",
-    "brand": "AMUL_BRAND_ID",
-    "status": true
-  },
-  {
-    "name": "Amul Taaza",
-    "packSize": "500 ml",
-    "mrp": 30,
-    "sellingPrice": 29,
-    "stock": 150,
     "category": "MILK_CATEGORY_ID",
     "brand": "AMUL_BRAND_ID",
     "status": true
@@ -96,16 +66,6 @@ Product
     "stock": 90,
     "category": "MILK_CATEGORY_ID",
     "brand": "GOKUL_BRAND_ID",
-    "status": true
-  },
-  {
-    "name": "Warana Ghee",
-    "packSize": "500 ml",
-    "mrp": 320,
-    "sellingPrice": 310,
-    "stock": 40,
-    "category": "GHEE_CATEGORY_ID",
-    "brand": "WARANA_BRAND_ID",
     "status": true
   }
 ]

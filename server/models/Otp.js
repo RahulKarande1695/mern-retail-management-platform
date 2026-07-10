@@ -6,10 +6,10 @@ const otpSchema = new mongoose.Schema({
   code: { type: String, required: true },
   expiresAt: { type: Date, required: true },
   role: {
-  type: String,
-  enum: ["customer", "shop", "deliveryPartner"],
-  required: true,
-}
+    type: String,
+    enum: ["customer", "shop", "deliveryPartner"],
+    required: true,
+  },
 });
 
 // Auto-delete expired OTPs

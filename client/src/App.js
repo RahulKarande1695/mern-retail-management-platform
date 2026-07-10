@@ -22,7 +22,6 @@ import DeliveryBoyList from "./component/DeliveryBoy/DeliveryBoyList";
 import AddDeliveryBoy from "./component/DeliveryBoy/AddDeliveryBoy";
 import EditDeliveryBoy from "./component/DeliveryBoy/EditDeliveryBoy";
 import DeliveryBoyDetails from "./component/DeliveryBoy/DeliveryBoyDetails";
-
 import Login from "./component/DeliveryPatner/Login";
 import DeliveryLayout from "./component/DeliveryPatner/Layout";
 import Dashboard from "./component/DeliveryPatner/Dashboard";
@@ -38,7 +37,6 @@ import OrderSuccess from "./component/Payment/OrderSuccess";
 import ReturnRequests from "./component/OrdersList/ReturnRequests/ReturnRequests";
 import ApprovedReturns from "./component/OrdersList/ReturnRequests/ApprovedReturns";
 import ShopDashboard from "./component/ShopDashboard/Dashboard/Dashboard";
-
 
 function App() {
   return (

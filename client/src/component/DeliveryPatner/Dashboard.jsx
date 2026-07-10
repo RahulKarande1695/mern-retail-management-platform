@@ -18,25 +18,25 @@ import api from "../../api/axios";
 
 const statCards = [
   {
-    key: "assigned",
+    key: "assignedOrders",
     label: "Assigned Orders",
     icon: AssignmentIcon,
     color: "primary.main",
   },
   {
-    key: "picked",
+    key: "pickedOrders",
     label: "Picked Orders",
     icon: LocalShippingIcon,
     color: "warning.main",
   },
   {
-    key: "delivered",
+    key: "deliveredOrders",
     label: "Delivered Orders",
     icon: CheckCircleIcon,
     color: "success.main",
   },
   {
-    key: "cancelled",
+    key: "cancelledOrders",
     label: "Cancelled Orders",
     icon: HistoryIcon,
     color: "error.main",
@@ -47,16 +47,21 @@ const Dashboard = () => {
   const [deliveryBoy, setDeliveryBoy] = useState(null);
 
   const [dashboard, setDashboard] = useState({
-    assigned: 0,
-    picked: 0,
-    delivered: 0,
-    cancelled: 0,
+    assignedOrders: 0,
+    pickedOrders: 0,
+    deliveredOrders: 0,
+    cancelledOrders: 0,
   });
 
-  useEffect(() => {
-    getProfile();
-    // getDashboard();
-  }, []);
+  const getDashboard = async () => {
+    try {
+      const res = await api.get("/deliveryBoy/dashboard");
+
+      setDashboard(res.data);
+    } catch (err) {
+      console.log(err);
+    }
+  };
 
   const getProfile = async () => {
     try {
@@ -67,6 +72,11 @@ const Dashboard = () => {
       console.log(err);
     }
   };
+
+  useEffect(() => {
+    getProfile();
+    getDashboard();
+  }, []);
 
   return (
     <Box sx={{ p: { xs: 2, sm: 3 } }}>
@@ -90,7 +100,10 @@ const Dashboard = () => {
         }}
       >
         <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
-          <Typography variant="h6" sx={{ fontSize: { xs: "1.05rem", sm: "1.25rem" } }}>
+          <Typography
+            variant="h6"
+            sx={{ fontSize: { xs: "1.05rem", sm: "1.25rem" } }}
+          >
             Welcome, <strong>{deliveryBoy?.name}</strong>
           </Typography>
 
