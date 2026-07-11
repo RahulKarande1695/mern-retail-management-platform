@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Routes, Route } from "react-router-dom";
 import Missing from "./missing";
 import ProductUi from "./component/products/productUi";
@@ -37,8 +38,40 @@ import OrderSuccess from "./component/Payment/OrderSuccess";
 import ReturnRequests from "./component/OrdersList/ReturnRequests/ReturnRequests";
 import ApprovedReturns from "./component/OrdersList/ReturnRequests/ApprovedReturns";
 import ShopDashboard from "./component/ShopDashboard/Dashboard/Dashboard";
+import socket from "./socket/socket";
 
 function App() {
+  useEffect(() => {
+    socket.connect();
+    socket.on("connect", () => {
+      console.log("socket connected", socket.id);
+      let user = null;
+        const roleName = sessionStorage.getItem("currentRole");
+
+      if (localStorage.getItem("customer")) {
+        user = JSON.parse(localStorage.getItem("customer"));
+      } else if (localStorage.getItem("deliveryPartner")) {
+        user = JSON.parse(localStorage.getItem("deliveryPartner"));
+      } else if (localStorage.getItem("shop")) {
+        user = JSON.parse(localStorage.getItem("shop"));
+      }
+      console.log("USER", roleName);
+      if (user) {
+        // shop common room
+        if (roleName === "shop") {
+          socket.emit("JOIN_SHOP");
+        }
+
+        // customer / delivery personal room
+        socket.emit("JOIN_USER", user._id);
+      }
+    });
+
+    return () => {
+      socket.off("connect");
+    };
+  }, []);
+
   return (
     <Routes>
       <Route path="/" element={<Layout />}>

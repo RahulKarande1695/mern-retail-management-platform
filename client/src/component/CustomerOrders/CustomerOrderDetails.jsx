@@ -15,6 +15,7 @@ import PaidIcon from "@mui/icons-material/Paid";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import api from "../../api/axios";
+import socket from "../../socket/socket";
 
 const cardSx = {
   borderRadius: "16px",
@@ -29,6 +30,15 @@ const CustomerOrderDetails = () => {
 
   useEffect(() => {
     getOrder();
+
+    socket.on("ORDER_UPDATED", (updatedOrder) => {
+      console.log("Realtime order", updatedOrder);
+      setOrder(updatedOrder);
+    });
+
+    return () => {
+      socket.off("ORDER_UPDATED");
+    };
   }, []);
 
   const getOrder = async () => {
@@ -46,19 +56,12 @@ const CustomerOrderDetails = () => {
       const res = await api.get(`/orders/${order._id}/invoice`, {
         responseType: "blob",
       });
-
       const url = window.URL.createObjectURL(new Blob([res.data]));
-
       const link = document.createElement("a");
-
       link.href = url;
-
       link.setAttribute("download", `${order.orderNumber}.pdf`);
-
       document.body.appendChild(link);
-
       link.click();
-
       link.remove();
     } catch (err) {
       console.log(err);
@@ -131,7 +134,11 @@ const CustomerOrderDetails = () => {
 
           <Stack direction="row" alignItems="center" spacing={1.5} mt={2.5}>
             <Typography fontWeight={600}>Order Status :</Typography>
-            <Chip color="primary" label={order.orderStatus} sx={{ fontWeight: 600 }} />
+            <Chip
+              color="primary"
+              label={order.orderStatus}
+              sx={{ fontWeight: 600 }}
+            />
           </Stack>
         </CardContent>
       </Card>
@@ -172,7 +179,12 @@ const CustomerOrderDetails = () => {
         </Card>
       )}
 
-      <Typography variant="h5" fontWeight={700} mb={2} sx={{ fontSize: { xs: "1.1rem", sm: "1.5rem" } }}>
+      <Typography
+        variant="h5"
+        fontWeight={700}
+        mb={2}
+        sx={{ fontSize: { xs: "1.1rem", sm: "1.5rem" } }}
+      >
         Products
       </Typography>
 
@@ -201,7 +213,11 @@ const CustomerOrderDetails = () => {
                 />
 
                 <Box sx={{ flex: 1, minWidth: 0 }}>
-                  <Typography variant="h6" fontWeight={600} sx={{ wordBreak: "break-word" }}>
+                  <Typography
+                    variant="h6"
+                    fontWeight={600}
+                    sx={{ wordBreak: "break-word" }}
+                  >
                     {item.productName}
                   </Typography>
 
@@ -227,7 +243,11 @@ const CustomerOrderDetails = () => {
                     ₹{item.price}
                   </Typography>
 
-                  <Chip sx={{ mt: 1.5, fontWeight: 500 }} label={item.itemStatus} size="small" />
+                  <Chip
+                    sx={{ mt: 1.5, fontWeight: 500 }}
+                    label={item.itemStatus}
+                    size="small"
+                  />
 
                   {item.returnStatus !== "None" && (
                     <Box mt={1.5}>
@@ -282,14 +302,15 @@ const CustomerOrderDetails = () => {
                 </Stack>
               )}
 
-              {item.itemStatus === "Delivered" && item.returnStatus === "None" && (
-                <Button
-                  variant="outlined"
-                  sx={{ mt: 2, borderRadius: "10px", textTransform: "none" }}
-                >
-                  Request Return
-                </Button>
-              )}
+              {item.itemStatus === "Delivered" &&
+                item.returnStatus === "None" && (
+                  <Button
+                    variant="outlined"
+                    sx={{ mt: 2, borderRadius: "10px", textTransform: "none" }}
+                  >
+                    Request Return
+                  </Button>
+                )}
             </CardContent>
           </Card>
         ))}

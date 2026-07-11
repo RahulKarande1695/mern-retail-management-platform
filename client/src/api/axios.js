@@ -49,7 +49,6 @@ api.interceptors.response.use(
 
       try {
         const res = await api.post("/auth/refresh");
-        console.log(res, "res..");
         const newToken = res.data.accessToken;
         const role = res.data.role;
 
@@ -66,7 +65,6 @@ api.interceptors.response.use(
 
           case "deliveryPartner":
             localStorage.setItem("deliveryPartnerToken", newToken);
-
             localStorage.setItem(
               "deliveryPartner",
               JSON.stringify(res.data.deliveryPartner),

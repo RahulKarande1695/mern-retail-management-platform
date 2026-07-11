@@ -3,6 +3,8 @@ import PDFDocument from "pdfkit";
 import Order from "../models/Order.js";
 import authMiddleware from "../middleware/authMiddleware.js";
 import DeliveryBoy from "../models/DeliveryBoy.js";
+import { getIo } from "../socket/socket.js";
+import { emitOrderUpdate } from "../events/orderEvents.js";
 
 const router = express.Router();
 
@@ -137,9 +139,8 @@ router.post(
       }
 
       updateOrderStatus(order);
-
       await order.save();
-
+      emitOrderUpdate(order);
       res.json(order);
     } catch (err) {
       res.status(500).json({
@@ -248,6 +249,8 @@ router.post(
 
       await order.save();
 
+      await order.save();
+      emitOrderUpdate(order);
       res.json(order);
     } catch (err) {
       res.status(500).json({
@@ -287,7 +290,7 @@ router.post(
       updateOrderStatus(order);
 
       await order.save();
-
+      emitOrderUpdate(order);
       res.json(order);
     } catch (err) {
       res.status(500).json({
@@ -439,13 +442,15 @@ router.post("/:orderId/assignDeliveryBoy", authMiddleware, async (req, res) => {
     // Delivery Boy busy
     deliveryBoy.currentOrder = order._id;
     deliveryBoy.isAvailable = false;
+
     await order.save();
     await deliveryBoy.save();
-
+    emitOrderUpdate(order);
     res.json({
       message: "Delivery Boy Assigned Successfully",
       order,
     });
+
   } catch (err) {
     res.status(500).json({
       message: err.message,
@@ -480,7 +485,7 @@ router.post("/:orderId/accept-delivery", authMiddleware, async (req, res) => {
     });
 
     await order.save();
-
+    emitOrderUpdate(order);
     res.json({
       message: "Delivery Accepted",
       order,
@@ -521,7 +526,7 @@ router.post("/:orderId/picked", authMiddleware, async (req, res) => {
     });
 
     await order.save();
-
+    emitOrderUpdate(order);
     res.json({
       message: "Order Picked Successfully",
       order,
@@ -582,7 +587,7 @@ router.post("/:orderId/delivered", authMiddleware, async (req, res) => {
     }
 
     await order.save();
-
+    emitOrderUpdate(order);
     res.json({
       message: "Order Delivered Successfully",
       order,
@@ -791,10 +796,6 @@ router.get("/:id", authMiddleware, async (req, res) => {
       .populate("customer")
       .populate("items.product")
       .populate("deliveryBoy", "name mobile vehicleType");
-    console.log("GET ORDER");
-    console.log(order._id.toString());
-    console.log(order.orderNumber);
-    console.log(order.items[0]._id.toString());
     if (!order) {
       return res.status(404).json({
         message: "Order not found",

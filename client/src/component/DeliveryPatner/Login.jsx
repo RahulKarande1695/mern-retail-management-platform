@@ -43,14 +43,12 @@ const Login = () => {
       const res = await api.post("/deliveryBoy/login", formData);
 
       localStorage.setItem("deliveryPartnerToken", res.data.accessToken);
-
       localStorage.setItem(
         "deliveryPartner",
         JSON.stringify(res.data.deliveryPartner),
       );
 
       sessionStorage.setItem("currentRole", "deliveryPartner");
-
       navigate("/delivery/dashboard");
 
       navigate("/delivery/dashboard");

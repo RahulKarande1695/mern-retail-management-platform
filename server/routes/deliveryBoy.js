@@ -71,13 +71,11 @@ router.get("/dashboard", authMiddleware, async (req, res) => {
 
     res.json({
       assignedOrders,
-
       pickedOrders,
-
       deliveredOrders,
-
       cancelledOrders,
     });
+
   } catch (err) {
     res.status(500).json({
       message: err.message,
