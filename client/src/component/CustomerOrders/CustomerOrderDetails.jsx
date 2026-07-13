@@ -15,7 +15,6 @@ import PaidIcon from "@mui/icons-material/Paid";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import api from "../../api/axios";
-import socket from "../../socket/socket";
 
 const cardSx = {
   borderRadius: "16px",
@@ -30,15 +29,6 @@ const CustomerOrderDetails = () => {
 
   useEffect(() => {
     getOrder();
-
-    socket.on("ORDER_UPDATED", (updatedOrder) => {
-      console.log("Realtime order", updatedOrder);
-      setOrder(updatedOrder);
-    });
-
-    return () => {
-      socket.off("ORDER_UPDATED");
-    };
   }, []);
 
   const getOrder = async () => {

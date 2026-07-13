@@ -36,6 +36,15 @@ const OrdersList = () => {
 
   useEffect(() => {
     getOrders();
+
+    socket.on("ORDER_UPDATED", () => {
+      console.log("Shop Orders realtime");
+      getOrders();
+    });
+
+    return () => {
+      socket.off("ORDER_UPDATED");
+    };
   }, [status]);
 
   const getOrders = async () => {

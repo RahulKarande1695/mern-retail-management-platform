@@ -17,6 +17,7 @@ import { useParams } from "react-router-dom";
 
 import api from "../../api/axios";
 import DeliveryMap from "../map/DeliveryMap";
+import socket from "../../socket/socket";
 
 const cardSx = {
   borderRadius: "16px",
@@ -37,6 +38,19 @@ const DeliveryOrderDetails = () => {
   useEffect(() => {
     getOrder();
   }, []);
+
+  useEffect(() => {
+  socket.on("ORDER_UPDATED", (updatedOrder) => {
+    if (updatedOrder._id === id) {
+      console.log("Delivery realtime", updatedOrder);
+      setOrder(updatedOrder);
+    }
+  });
+
+  return () => {
+    socket.off("ORDER_UPDATED");
+  };
+}, [id]);
 
   const getOrder = async () => {
     try {

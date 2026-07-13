@@ -6,6 +6,7 @@ import api from "../../api/axios";
 import CartSection from "./CartSection";
 import CurrentOrder from "./CurrentOrder";
 import OrderHistory from "./OrderHistory";
+import socket from "../../socket/socket";
 
 const CustomerOrders = () => {
   const [loading, setLoading] = useState(true);
@@ -18,6 +19,14 @@ const CustomerOrders = () => {
 
   useEffect(() => {
     loadData();
+
+    socket.on("ORDER_UPDATED", (updatedOrder) => {
+      setCurrentOrder(updatedOrder || null);
+    });
+    
+    return () => {
+      socket.off("ORDER_UPDATED");
+    };
   }, []);
 
   const loadData = async () => {
@@ -35,16 +44,17 @@ const CustomerOrders = () => {
 
       const activeOrder = orders.find(
         (item) =>
-          item.orderStatus !== "Delivered" && item.orderStatus !== "Cancelled"
+          item.orderStatus !== "Delivered" && item.orderStatus !== "Cancelled",
       );
-
+      console.log(activeOrder, "activeOrder")
       setCurrentOrder(activeOrder || null);
 
       setHistory(
         orders.filter(
           (item) =>
-            item.orderStatus === "Delivered" || item.orderStatus === "Cancelled"
-        )
+            item.orderStatus === "Delivered" ||
+            item.orderStatus === "Cancelled",
+        ),
       );
     } catch (err) {
       console.log(err);
@@ -84,9 +94,13 @@ const CustomerOrders = () => {
       </Typography>
 
       <Stack spacing={{ xs: 2, sm: 3 }}>
-        {cart?.items?.length > 0 && <CartSection cart={cart} refresh={loadData} />}
+        {cart?.items?.length > 0 && (
+          <CartSection cart={cart} refresh={loadData} />
+        )}
 
-        {currentOrder && <CurrentOrder order={currentOrder} refresh={loadData} />}
+        {currentOrder && (
+          <CurrentOrder order={currentOrder} refresh={loadData} />
+        )}
 
         <OrderHistory orders={history} />
       </Stack>

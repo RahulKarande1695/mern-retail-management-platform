@@ -1,5 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
+import { Toaster } from "react-hot-toast";
 import './index.css';
 import App from './App';
 import { BrowserRouter, Route, Routes} from 'react-router-dom';
@@ -15,6 +16,13 @@ root.render(
           <Route path="/*" element={<App />} />
         </Routes>
     </BrowserRouter>
+      <Toaster
+    position="top-right"
+    reverseOrder={false}
+    toastOptions={{
+      duration: 4000,
+    }}
+  />
     </Provider>
   </React.StrictMode>
 );

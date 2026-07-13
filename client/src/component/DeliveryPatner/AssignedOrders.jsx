@@ -20,6 +20,15 @@ const AssignedOrders = () => {
 
   useEffect(() => {
     getAssignedOrders();
+
+    socket.on("ORDER_UPDATED", () => {
+      console.log("Assigned Orders realtime");
+      getAssignedOrders();
+    });
+
+    return () => {
+      socket.off("ORDER_UPDATED");
+    };
   }, []);
 
   const getAssignedOrders = async () => {
@@ -129,7 +138,8 @@ const AssignedOrders = () => {
                           overflow: "hidden",
                         }}
                       >
-                        {order.deliveryAddress?.houseNo}, {order.deliveryAddress?.area},{" "}
+                        {order.deliveryAddress?.houseNo},{" "}
+                        {order.deliveryAddress?.area},{" "}
                         {order.deliveryAddress?.city}
                       </Typography>
                     </Box>
@@ -137,7 +147,11 @@ const AssignedOrders = () => {
 
                   <Button
                     fullWidth
-                    sx={{ mt: 2.5, borderRadius: "10px", textTransform: "none" }}
+                    sx={{
+                      mt: 2.5,
+                      borderRadius: "10px",
+                      textTransform: "none",
+                    }}
                     variant="contained"
                     onClick={() => navigate(`/delivery/orders/${order._id}`)}
                   >

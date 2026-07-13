@@ -20,6 +20,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 
 import api from "../../api/axios";
+import socket from "../../socket/socket";
 
 const OrderDetails = () => {
   const { id } = useParams();
@@ -34,6 +35,16 @@ const OrderDetails = () => {
   useEffect(() => {
     getOrder();
     getDeliveryBoys();
+    socket.on("ORDER_UPDATED", (updatedOrder) => {
+      if (updatedOrder._id === id) {
+        console.log("Shop realtime", updatedOrder);
+        setOrder(updatedOrder);
+      }
+    });
+
+    return () => {
+      socket.off("ORDER_UPDATED");
+    };
   }, [id]);
 
   const getOrder = async () => {
@@ -49,7 +60,7 @@ const OrderDetails = () => {
       const availableDeliveryBoys = res.data.filter(
         (item) => item.isVerified && item.isAvailable,
       );
-      console.log(res.data,availableDeliveryBoys)
+      console.log(res.data, availableDeliveryBoys);
       setDeliveryBoys(availableDeliveryBoys);
     } catch (err) {
       console.log(err);

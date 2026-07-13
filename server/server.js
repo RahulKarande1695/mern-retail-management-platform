@@ -21,6 +21,7 @@ import addressRoutes from "./routes/address.js";
 import checkoutRoutes from "./routes/checkout.js";
 import deliveryBoyRoutes from "./routes/deliveryBoy.js";
 import analyticsRoutes from "./routes/analytics.js";
+import notificationRoutes from "./routes/notification.js";
 
 dotenv.config();
 
@@ -45,9 +46,8 @@ io.on("connection", (socket) => {
 
   // user joins own room
   socket.on("JOIN_USER", (userId) => {
-    console.log("JOIN EVENT:", userId);
     socket.join(userId);
-    console.log("ROOMS:", [...socket.rooms]);
+    console.log("ROOMS:", [...socket.rooms], "JOIN_USER", userId);
   });
 
   socket.on("JOIN_SHOP", () => {
@@ -58,7 +58,6 @@ io.on("connection", (socket) => {
   socket.on("disconnect", () => {
     console.log("Disconnected:", socket.id);
   });
-
 
 });
 
@@ -95,6 +94,7 @@ app.use("/address", addressRoutes);
 app.use("/deliveryBoy", deliveryBoyRoutes);
 app.use("/checkout", checkoutRoutes);
 app.use("/analytics", analyticsRoutes);
+app.use("/notifications", notificationRoutes);
 
 // DB
 mongoose

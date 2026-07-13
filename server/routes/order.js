@@ -5,6 +5,7 @@ import authMiddleware from "../middleware/authMiddleware.js";
 import DeliveryBoy from "../models/DeliveryBoy.js";
 import { getIo } from "../socket/socket.js";
 import { emitOrderUpdate } from "../events/orderEvents.js";
+import { createNotification } from "../events/notificationEvents.js";
 
 const router = express.Router();
 
@@ -140,6 +141,12 @@ router.post(
 
       updateOrderStatus(order);
       await order.save();
+      await createNotification({
+        userId: order.customer,
+        orderId: order._id,
+        title: "Order Accepted",
+        message: `Your order ${order.orderNumber} has been accepted.`,
+      });
       emitOrderUpdate(order);
       res.json(order);
     } catch (err) {
@@ -250,6 +257,12 @@ router.post(
       await order.save();
 
       await order.save();
+      await createNotification({
+        userId: order.customer,
+        orderId: order._id,
+        title: "Order Packed",
+        message: `Your order ${order.orderNumber} has been packed.`,
+      });
       emitOrderUpdate(order);
       res.json(order);
     } catch (err) {
@@ -290,6 +303,12 @@ router.post(
       updateOrderStatus(order);
 
       await order.save();
+      await createNotification({
+        userId: order.customer,
+        orderId: order._id,
+        title: "Delivery Partner Assigned",
+        message: "Your delivery partner has been assigned.",
+      });
       emitOrderUpdate(order);
       res.json(order);
     } catch (err) {
@@ -445,12 +464,17 @@ router.post("/:orderId/assignDeliveryBoy", authMiddleware, async (req, res) => {
 
     await order.save();
     await deliveryBoy.save();
+    await createNotification({
+      userId: deliveryBoy._id,
+      orderId: order._id,
+      title: "New Delivery Assigned",
+      message: `Order ${order.orderNumber} has been assigned to you.`,
+    });
     emitOrderUpdate(order);
     res.json({
       message: "Delivery Boy Assigned Successfully",
       order,
     });
-
   } catch (err) {
     res.status(500).json({
       message: err.message,
@@ -485,6 +509,12 @@ router.post("/:orderId/accept-delivery", authMiddleware, async (req, res) => {
     });
 
     await order.save();
+    await createNotification({
+      userId: order.customer,
+      orderId: order._id,
+      title: "Delivery Accepted",
+      message: "Delivery partner has accepted your order.",
+    });
     emitOrderUpdate(order);
     res.json({
       message: "Delivery Accepted",
@@ -526,6 +556,12 @@ router.post("/:orderId/picked", authMiddleware, async (req, res) => {
     });
 
     await order.save();
+    await createNotification({
+      userId: order.customer,
+      orderId: order._id,
+      title: "Order Picked Up",
+      message: "Your order is on the way.",
+    });
     emitOrderUpdate(order);
     res.json({
       message: "Order Picked Successfully",
@@ -587,6 +623,12 @@ router.post("/:orderId/delivered", authMiddleware, async (req, res) => {
     }
 
     await order.save();
+    await createNotification({
+      userId: order.customer,
+      orderId: order._id,
+      title: "Order Delivered",
+      message: "Your order has been delivered successfully.",
+    });
     emitOrderUpdate(order);
     res.json({
       message: "Order Delivered Successfully",

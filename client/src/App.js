@@ -44,27 +44,24 @@ function App() {
   useEffect(() => {
     socket.connect();
     socket.on("connect", () => {
-      console.log("socket connected", socket.id);
       let user = null;
-        const roleName = sessionStorage.getItem("currentRole");
+      const roleName = sessionStorage.getItem("currentRole");
 
-      if (localStorage.getItem("customer")) {
+      if (roleName === "customer") {
         user = JSON.parse(localStorage.getItem("customer"));
-      } else if (localStorage.getItem("deliveryPartner")) {
+      } else if (roleName === "deliveryPartner") {
         user = JSON.parse(localStorage.getItem("deliveryPartner"));
-      } else if (localStorage.getItem("shop")) {
+      } else if (roleName === "shop") {
         user = JSON.parse(localStorage.getItem("shop"));
+        socket.emit("JOIN_SHOP");
       }
-      console.log("USER", roleName);
-      if (user) {
-        // shop common room
-        if (roleName === "shop") {
-          socket.emit("JOIN_SHOP");
-        }
 
-        // customer / delivery personal room
+      // customer / delivery personal room
+      if (user) {
         socket.emit("JOIN_USER", user._id);
       }
+
+      console.log("roleName", roleName, "user", user, "socket id", socket.id);
     });
 
     return () => {
@@ -286,6 +283,7 @@ function App() {
       </Route>
       <Route path="*" element={<Missing />} />
     </Routes>
+
   );
 }
 
